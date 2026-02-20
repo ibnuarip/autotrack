@@ -1,8 +1,32 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../utils/custom_toast.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Show success toast if coming from login/register
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (CustomToast.showLoginSuccessToast) {
+        CustomToast.showSuccess(
+          context,
+          title: 'Berhasil',
+          message: CustomToast.successMessage ?? 'Selamat datang di AutoTrack!',
+        );
+        // Reset flag
+        CustomToast.showLoginSuccessToast = false;
+        CustomToast.successMessage = null;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +36,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AutoTrack'),
-        backgroundColor: Colors.blue[900],
+        backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Colors.white,
         actions: [
           IconButton(

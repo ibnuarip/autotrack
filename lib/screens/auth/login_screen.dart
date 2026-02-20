@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../utils/custom_toast.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,15 +34,22 @@ class _LoginScreenState extends State<LoginScreen> {
           _emailController.text.trim(),
           _passwordController.text,
         );
+        CustomToast.showLoginSuccessToast = true;
+        CustomToast.successMessage = 'Selamat datang kembali di AutoTrack!';
+        if (!mounted) return;
         // Navigation is handled by auth state listener in main.dart
       } catch (e) {
+        CustomToast.showLoginSuccessToast = false;
         if (!mounted) return;
         setState(() {
-          _errorMessage = 'Login Gagal: ${e.toString().split(']').last.trim()}';
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_errorMessage), backgroundColor: Colors.red),
+        CustomToast.showError(
+          context,
+          title: 'Akses Ditolak',
+          message: (e.toString().contains('user-not-found') || e.toString().contains('wrong-password') || e.toString().contains('invalid-credential'))
+              ? 'Email atau Password yang Anda masukan tidak valid.'
+              : 'Terjadi kendala saat melakukan verifikasi. Silakan coba beberapa saat lagi.',
         );
       }
     }
@@ -53,16 +62,28 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await _authService.signInWithGoogle();
+      final user = await _authService.signInWithGoogle();
+      if (user == null) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      CustomToast.showLoginSuccessToast = true;
+      CustomToast.successMessage = 'Kamu telah masuk menggunakan Google.';
+      if (!mounted) return;
       // Navigation is handled by auth state listener in main.dart
     } catch (e) {
+      CustomToast.showLoginSuccessToast = false;
       if (!mounted) return;
       setState(() {
-        _errorMessage = 'Login Google Gagal: ${e.toString().split(']').last.trim()}';
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_errorMessage), backgroundColor: Colors.red),
+      CustomToast.showError(
+        context,
+        title: 'Google Login Gagal',
+        message: e.toString().split(']').last.trim(),
       );
     }
   }
@@ -91,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0D47A1),
+                    color: Color(0xFF8100D1),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -106,6 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: 'Email',
                     prefixIcon: const Icon(Icons.email_outlined),
@@ -128,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password field
                 TextFormField(
                   controller: _passwordController,
+                  autofillHints: const [AutofillHints.password],
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -156,13 +179,36 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 12),
+
+                // Forgot password link
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ForgotPasswordScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Lupa Password?',
+                      style: TextStyle(
+                        color: Color(0xFFFF52A0),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 
                 // Login button
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D47A1),
+                    backgroundColor: const Color(0xFF8100D1),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -198,7 +244,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.grey),
+                    side: const BorderSide(color: Color(0xFFB500B2)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -234,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text(
                         "Daftar di sini",
                         style: TextStyle(
-                          color: Color(0xFF0D47A1),
+                          color: Color(0xFF8100D1),
                           fontWeight: FontWeight.bold,
                         ),
                       ),

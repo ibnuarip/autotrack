@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../utils/custom_toast.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -27,23 +28,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
       });
 
       try {
+        // Create account
         await _authService.registerWithEmailAndPassword(
           _emailController.text.trim(),
           _passwordController.text,
           _nameController.text.trim(),
         );
-        // Success: Close register screen to show home screen (handled in main.dart)
-        if (mounted) Navigator.pop(context);
+        
+        // Immediately sign out to prevent auto-login
+        await _authService.signOut();
+        
+        if (!mounted) return;
+        
+        CustomToast.showSuccess(
+          context,
+          title: 'Registrasi Berhasil',
+          message: 'Akun telah dibuat. Silakan masuk menggunakan akun baru Anda.',
+        );
+        
+        // Return to login screen
+        Navigator.pop(context);
       } catch (e) {
+        CustomToast.showLoginSuccessToast = false;
         if (!mounted) return;
         setState(() {
           _isLoading = false;
         });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Registrasi Gagal: ${e.toString().split(']').last.trim()}'),
-            backgroundColor: Colors.red,
-          ),
+        CustomToast.showError(
+          context,
+          title: 'Registrasi Gagal',
+          message: e.toString().split(']').last.trim(),
         );
       }
     }
@@ -55,19 +69,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      await _authService.signInWithGoogle();
+      final user = await _authService.signInWithGoogle();
+      if (user == null) {
+        if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+      CustomToast.showLoginSuccessToast = true;
+      CustomToast.successMessage = 'Kamu telah masuk menggunakan Google.';
+      if (!mounted) return;
       // Success: navigation handled by main.dart, but we pop this screen
       if (mounted) Navigator.pop(context);
     } catch (e) {
+      CustomToast.showLoginSuccessToast = false;
       if (!mounted) return;
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login Google Gagal: ${e.toString().split(']').last.trim()}'),
-          backgroundColor: Colors.red,
-        ),
+      CustomToast.showError(
+        context,
+        title: 'Google Login Gagal',
+        message: e.toString().split(']').last.trim(),
       );
     }
   }
@@ -80,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF0D47A1)),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF8100D1)),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -98,7 +122,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0D47A1),
+                    color: Color(0xFF8100D1),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -112,6 +136,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Name field
                 TextFormField(
                   controller: _nameController,
+                  autofillHints: const [AutofillHints.name],
                   decoration: InputDecoration(
                     labelText: 'Nama Lengkap',
                     prefixIcon: const Icon(Icons.person_outline),
@@ -132,6 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
+                  autofillHints: const [AutofillHints.email],
                   decoration: InputDecoration(
                     labelText: 'Email',
                     prefixIcon: const Icon(Icons.email_outlined),
@@ -154,6 +180,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Password field
                 TextFormField(
                   controller: _passwordController,
+                  autofillHints: const [AutofillHints.newPassword],
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -187,6 +214,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Confirm Password field
                 TextFormField(
                   controller: _confirmPasswordController,
+                  autofillHints: const [AutofillHints.newPassword],
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
                     labelText: 'Konfirmasi Password',
@@ -208,7 +236,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0D47A1),
+                    backgroundColor: const Color(0xFF8100D1),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -244,7 +272,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    side: const BorderSide(color: Colors.grey),
+                    side: const BorderSide(color: Color(0xFFB500B2)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -275,7 +303,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: const Text(
                         "Login di sini",
                         style: TextStyle(
-                          color: Color(0xFF0D47A1),
+                          color: Color(0xFF8100D1),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
