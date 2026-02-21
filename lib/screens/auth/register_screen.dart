@@ -77,8 +77,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         });
         return;
       }
-      CustomToast.showLoginSuccessToast = true;
-      CustomToast.successMessage = 'Kamu telah masuk menggunakan Google.';
       if (!mounted) return;
       // Success: navigation handled by main.dart, but we pop this screen
       if (mounted) Navigator.pop(context);

@@ -70,8 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
         });
         return;
       }
-      CustomToast.showLoginSuccessToast = true;
-      CustomToast.successMessage = 'Kamu telah masuk menggunakan Google.';
       if (!mounted) return;
       // Navigation is handled by auth state listener in main.dart
     } catch (e) {

@@ -58,44 +58,45 @@ class CustomToast {
         content: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 20,
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 15,
                 spreadRadius: 0,
-                offset: const Offset(0, 8),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: IntrinsicHeight(
+            borderRadius: BorderRadius.circular(10),
+            child: SizedBox(
+              height: 70, // Fixed height for consistency
               child: Row(
                 children: [
-                  // Left Border Color Indicator
+                  // Left Border Color Indicator (Slimmer)
                   Container(
-                    width: 8,
+                    width: 6,
                     color: mainColor,
                   ),
-                  const SizedBox(width: 16),
-                  // Icon Section
+                  const SizedBox(width: 12),
+                  // Icon Section (Smaller)
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: mainColor.withOpacity(0.12),
+                        color: mainColor.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(iconData, color: mainColor, size: 24),
+                      child: Icon(iconData, color: mainColor, size: 20),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  // Text Content Section
+                  const SizedBox(width: 12),
+                  // Text Content Section (Compact)
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
@@ -105,19 +106,19 @@ class CustomToast {
                             style: const TextStyle(
                               color: Color(0xFF1A1A1A),
                               fontWeight: FontWeight.bold,
-                              fontSize: 17,
-                              letterSpacing: 0.3,
+                              fontSize: 15,
+                              letterSpacing: 0.2,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             message,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.black54,
-                              fontSize: 14,
-                              height: 1.4,
+                              fontSize: 13,
+                              height: 1.3,
                               letterSpacing: 0.1,
                             ),
                           ),
@@ -125,7 +126,7 @@ class CustomToast {
                       ),
                     ),
                   ),
-                  // Close Button
+                  // Close Button (Smaller)
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -134,8 +135,8 @@ class CustomToast {
                       },
                       borderRadius: BorderRadius.circular(20),
                       child: const Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Icon(Icons.close, color: Colors.grey, size: 20),
+                        padding: EdgeInsets.all(12.0),
+                        child: Icon(Icons.close, color: Colors.grey, size: 18),
                       ),
                     ),
                   ),
@@ -149,7 +150,7 @@ class CustomToast {
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
         margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - (safeAreaTop + 140),
+          bottom: MediaQuery.of(context).size.height - (safeAreaTop + 180), // Lowered further for full visibility
           left: 16,
           right: 16,
         ),
