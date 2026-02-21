@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/custom_toast.dart';
-import 'home/dashboard_screen.dart';
+import 'home_screen.dart';
 import 'vehicle/vehicle_list_screen.dart';
 import 'service/service_history_screen.dart';
 import 'settings/settings_screen.dart';
@@ -34,7 +34,7 @@ class _MainNavigationState extends State<MainNavigation> {
   }
 
   static const List<Widget> _screens = [
-    DashboardScreen(),
+    HomeScreen(),
     VehicleListScreen(),
     ServiceHistoryScreen(),
     SettingsScreen(),
