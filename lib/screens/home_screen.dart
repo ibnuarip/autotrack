@@ -114,9 +114,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           _buildFabOption(
             icon: Icons.build_circle_rounded,
             label: 'Tambah Servis',
-            onPressed: () {
+            onPressed: () async {
               setState(() => _isFabExpanded = false);
-              _navigateTo(const AddServiceScreen());
+              
+              // Cek apakah user sudah punya kendaraan
+              final vehicleSnapshot = await _firestore
+                  .collection('vehicles')
+                  .where('userId', isEqualTo: _currentUser!.uid)
+                  .get();
+
+              if (vehicleSnapshot.docs.isEmpty) {
+                if (mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Belum Ada Kendaraan'),
+                      content: const Text('Anda belum memiliki kendaraan. Silakan tambah kendaraan terlebih dahulu.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Batal'),
+                        ),
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _navigateTo(const AddVehicleScreen());
+                          },
+                          child: const Text('Tambah Kendaraan'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              } else {
+                _navigateTo(const AddServiceScreen());
+              }
             },
           ),
           const SizedBox(height: 12),
