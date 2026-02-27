@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../utils/custom_toast.dart';
+import 'add_service_screen.dart';
 
 class ServiceHistoryScreen extends StatefulWidget {
   const ServiceHistoryScreen({super.key});
@@ -22,12 +24,20 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
     return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 
+  bool _isUsingFallbackQuery = false;
+
   @override
   Widget build(BuildContext context) {
     final User? user = _auth.currentUser;
 
     if (user == null) {
       return const Scaffold(body: Center(child: Text('Silakan login terlebih dahulu')));
+    }
+
+    Query<Map<String, dynamic>> query = _firestore.collection('services').where('userId', isEqualTo: user.uid);
+    if (!_isUsingFallbackQuery) {
+      // Kembali menggunakan descending: true agar servis terbaru muncul di paling atas (Cara 2)
+      query = query.orderBy('serviceDate', descending: true);
     }
 
     return Scaffold(
@@ -38,12 +48,49 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
         foregroundColor: Colors.white,
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('services')
-            .where('userId', isEqualTo: user.uid)
-            .orderBy('serviceDate', descending: true)
-            .snapshots(),
+        stream: query.snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            final errorString = snapshot.error.toString();
+            // Handle index error gracefully
+            if (errorString.contains('requires an index') || errorString.contains('failed-precondition')) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.info_outline, size: 60, color: Colors.blue),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Mengoptimalkan Database...',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Kami sedang mengaktifkan fitur pencarian cepat. Sementara itu, Anda tetap bisa melihat data Anda.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () {
+                          setState(() {
+                            _isUsingFallbackQuery = true;
+                          });
+                        },
+                        label: const Text('Tampilkan Data Sekarang'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return Center(child: Text('Terjadi kesalahan: ${snapshot.error}'));
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -53,18 +100,38 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 80, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.history, size: 80, color: Colors.grey[300]),
+                  ),
+                  const SizedBox(height: 24),
                   Text(
                     'Belum ada riwayat servis',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey[600],
+                      color: Colors.grey[800],
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text('Catatan servis akan muncul di sini.'),
+                  Text(
+                    'Catatan servis kendaraan Anda\nakan muncul di sini.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 15),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () => Navigator.pushNamed(context, '/add-service'),
+                    icon: const Icon(Icons.add),
+                    label: const Text('Tambah Servis Pertama'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    ),
+                  ),
                 ],
               ),
             );
@@ -73,120 +140,195 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
           final serviceDocs = snapshot.data!.docs;
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             itemCount: serviceDocs.length,
             itemBuilder: (context, index) {
-              final data = serviceDocs[index].data() as Map<String, dynamic>;
+              final doc = serviceDocs[index];
+              final data = doc.data() as Map<String, dynamic>;
               final date = (data['serviceDate'] as Timestamp).toDate();
               final vehicleId = data['vehicleId'] as String;
               final reminderTime = data['reminderTime'] as String?;
+              final serviceType = data['serviceType'] ?? 'Servis';
+              final cost = (data['cost'] ?? 0).toDouble();
 
-              return Card(
-                margin: const EdgeInsets.only(bottom: 16),
-                elevation: 2,
-                shape: RoundedRectangleBorder(
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF8100D1).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF8100D1).withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.build_circle_rounded, color: Color(0xFF8100D1), size: 22),
                             ),
-                            child: const Icon(Icons.build_rounded, color: Color(0xFF8100D1)),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  FutureBuilder<DocumentSnapshot>(
+                                    future: _firestore.collection('vehicles').doc(vehicleId).get(),
+                                    builder: (context, vehSnapshot) {
+                                      if (vehSnapshot.hasData && vehSnapshot.data!.exists) {
+                                        final vehData = vehSnapshot.data!.data() as Map<String, dynamic>;
+                                        return Text(
+                                          vehData['name'] ?? 'Kendaraan',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                            color: Color(0xFF1A1A1A),
+                                          ),
+                                        );
+                                      }
+                                      return const Text('...', style: TextStyle(color: Colors.grey, fontSize: 14));
+                                    },
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    serviceType,
+                                    style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                FutureBuilder<DocumentSnapshot>(
-                                  future: _firestore.collection('vehicles').doc(vehicleId).get(),
-                                  builder: (context, vehSnapshot) {
-                                    String vehicleInfo = 'Memuat kendaraan...';
-                                    if (vehSnapshot.hasData && vehSnapshot.data!.exists) {
-                                      final vehData = vehSnapshot.data!.data() as Map<String, dynamic>;
-                                      vehicleInfo = '${vehData['name']} (${vehData['plateNumber']})';
-                                    }
-                                    return Text(
-                                      vehicleInfo,
+                                Row(
+                                  children: [
+                                    Text(
+                                      _formatCurrency(cost),
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                        color: Color(0xFF2E7D32),
+                                        fontSize: 14,
                                       ),
-                                    );
-                                  },
+                                    ),
+                                    const SizedBox(width: 2),
+                                    PopupMenuButton<String>(
+                                      icon: const Icon(Icons.more_vert, size: 18, color: Colors.grey),
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(),
+                                      onSelected: (value) {
+                                        if (value == 'edit') {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => AddServiceScreen(
+                                                serviceId: doc.id,
+                                                initialData: data,
+                                              ),
+                                            ),
+                                          );
+                                        } else if (value == 'delete') {
+                                          _showDeleteConfirmation(context, doc.id);
+                                        }
+                                      },
+                                      itemBuilder: (context) => [
+                                        const PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.edit_outlined, size: 18),
+                                              SizedBox(width: 12),
+                                              Text('Edit'),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                              SizedBox(width: 12),
+                                              Text('Hapus', style: TextStyle(color: Colors.red)),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(height: 4),
-                                Text(
-                                  data['serviceType'] ?? 'Servis',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 14,
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Lunas',
+                                    style: TextStyle(color: Colors.blue[700], fontSize: 9, fontWeight: FontWeight.bold),
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Text(
-                            _formatCurrency((data['cost'] ?? 0).toDouble()),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                              fontSize: 15,
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        color: Colors.grey[50],
+                        child: Row(
+                          children: [
+                            Icon(Icons.calendar_today_rounded, size: 12, color: Colors.grey[500]),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${date.day} ${_getMonth(date.month)} ${date.year}',
+                              style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
                             ),
-                          ),
-                        ],
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Divider(height: 1),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.calendar_today, size: 14, color: Colors.grey),
-                              const SizedBox(width: 6),
+                            const Spacer(),
+                            if (reminderTime != null) ...[
+                              Icon(Icons.notifications_active_outlined, size: 12, color: Colors.grey[500]),
+                              const SizedBox(width: 4),
                               Text(
-                                '${date.day} ${_getMonth(date.month)} ${date.year}',
-                                style: const TextStyle(fontSize: 13, color: Colors.grey),
+                                reminderTime,
+                                style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
                               ),
                             ],
-                          ),
-                          if (reminderTime != null)
-                            Row(
-                              children: [
-                                const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Ingatkan jam $reminderTime',
-                                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                                ),
-                              ],
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                      if (data['description'] != null && (data['description'] as String).isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          data['description'],
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey[700],
-                            fontStyle: FontStyle.italic,
+                      if (data['description'] != null && (data['description'] as String).isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.withOpacity(0.05),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              'Catatan: ${data['description']}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[700],
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
                           ),
                         ),
-                      ],
                     ],
                   ),
                 ),
@@ -194,6 +336,46 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
             },
           );
         },
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context, String serviceId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Riwayat?'),
+        content: const Text('Tindakan ini tidak dapat dibatalkan. Apakah Anda yakin ingin menghapus data servis ini?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await _firestore.collection('services').doc(serviceId).delete();
+                if (context.mounted) {
+                  CustomToast.showSuccess(
+                    context,
+                    title: 'Berhasil',
+                    message: 'Data servis berhasil dihapus.',
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  CustomToast.showError(
+                    context,
+                    title: 'Gagal Menghapus',
+                    message: e.toString(),
+                  );
+                }
+              }
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+          ),
+        ],
       ),
     );
   }

@@ -48,14 +48,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Profil Saya'),
+        title: const Text('Profil Saya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        backgroundColor: const Color(0xFF8100D1),
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
         builder: (context, snapshot) {
-          // Fallback data
           String name = user!.displayName ?? 'User AutoTrack';
           final String email = user!.email ?? '';
 
@@ -65,70 +68,134 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Color(0xFF8100D1),
-                  child: Icon(Icons.person, size: 50, color: Colors.white),
-                ),
-                const SizedBox(height: 24),
-                _buildInfoCard(context, 'Nama', name),
-                const SizedBox(height: 12),
-                _buildInfoCard(context, 'Email', email),
-                const SizedBox(height: 32),
-                
-                // TOMBOL EDIT - Selalu Aktif
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => EditProfileScreen(currentName: name),
+                // HEADER SECTION
+                Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF8100D1),
+                    borderRadius: BorderRadius.only(
+                      bottomLeft: Radius.circular(40),
+                      bottomRight: Radius.circular(40),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.white24,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const CircleAvatar(
+                              radius: 55,
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.person, size: 65, color: Color(0xFF8100D1)),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4)],
+                              ),
+                              child: const Icon(Icons.camera_alt, size: 18, color: Color(0xFF8100D1)),
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.edit),
-                  label: const Text('Edit Profil'),
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    backgroundColor: const Color(0xFF8100D1),
-                    foregroundColor: Colors.white,
+                      const SizedBox(height: 16),
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        'Member AutoTrack',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 12),
-                
-                // TOMBOL GANTI PASSWORD - Selalu Aktif
-                OutlinedButton.icon(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
-                    );
-                  },
-                  icon: const Icon(Icons.lock_outline),
-                  label: const Text('Ganti Password'),
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(double.infinity, 50),
-                    side: const BorderSide(color: Color(0xFF8100D1)),
-                    foregroundColor: const Color(0xFF8100D1),
+
+                const SizedBox(height: 32),
+
+                // INFO SECTION
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      _buildInfoItem(context, Icons.person_outline_rounded, 'Nama Lengkap', name),
+                      const SizedBox(height: 16),
+                      _buildInfoItem(context, Icons.email_outlined, 'Alamat Email', email),
+                      const SizedBox(height: 40),
+
+                      // ACTIONS
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditProfileScreen(currentName: name),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.edit_note_rounded),
+                        label: const Text('Perbarui Profil'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          backgroundColor: const Color(0xFF8100D1),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const ChangePasswordScreen()),
+                          );
+                        },
+                        icon: const Icon(Icons.lock_reset_rounded),
+                        label: const Text('Ganti Kata Sandi'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 56),
+                          side: const BorderSide(color: Color(0xFF8100D1), width: 1.5),
+                          foregroundColor: const Color(0xFF8100D1),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        ),
+                      ),
+                      
+                      if (snapshot.connectionState == ConnectionState.waiting)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 24),
+                          child: LinearProgressIndicator(
+                            backgroundColor: Color(0xFFF3E5F5),
+                            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8100D1)),
+                          ),
+                        ),
+                      
+                      const SizedBox(height: 40),
+                    ],
                   ),
                 ),
-                
-                if (snapshot.connectionState == ConnectionState.waiting)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 20),
-                    child: Text('Menyinkronkan data...', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                  ),
-                
-                if (snapshot.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Text('Error Sinkronisasi: Pastikan Firestore Rules sudah di-set.', 
-                      style: const TextStyle(fontSize: 12, color: Colors.red), textAlign: TextAlign.center),
-                  ),
               ],
             ),
           );
@@ -137,23 +204,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildInfoCard(BuildContext context, String label, String value) {
+  Widget _buildInfoItem(BuildContext context, IconData icon, String label, String value) {
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        color: const Color(0xFFF8F9FA),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF8100D1).withOpacity(0.08),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: const Color(0xFF8100D1), size: 22),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF2D2D2D)),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
+

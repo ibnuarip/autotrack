@@ -1,9 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import '../../utils/custom_toast.dart';
 
 class AddServiceScreen extends StatefulWidget {
-  const AddServiceScreen({super.key});
+  final String? serviceId;
+  final Map<String, dynamic>? initialData;
+
+  const AddServiceScreen({
+    super.key,
+    this.serviceId,
+    this.initialData,
+  });
 
   @override
   State<AddServiceScreen> createState() => _AddServiceScreenState();
@@ -15,7 +23,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String? _selectedVehicleId;
-  DateTime _serviceDate = DateTime.now();
+  late DateTime _serviceDate;
   DateTime? _nextServiceDate;
   TimeOfDay? _reminderTime;
   
@@ -24,6 +32,36 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final TextEditingController _costController = TextEditingController();
   
   bool _isLoading = false;
+  bool get _isEditMode => widget.serviceId != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditMode && widget.initialData != null) {
+      final data = widget.initialData!;
+      _selectedVehicleId = data['vehicleId'];
+      _serviceDate = (data['serviceDate'] as Timestamp).toDate();
+      _serviceTypeController.text = data['serviceType'] ?? '';
+      _descriptionController.text = data['description'] ?? '';
+      _costController.text = (data['cost'] ?? 0).toString();
+      
+      if (data['nextServiceDate'] != null) {
+        _nextServiceDate = (data['nextServiceDate'] as Timestamp).toDate();
+      }
+      
+      if (data['reminderTime'] != null) {
+        final timeParts = (data['reminderTime'] as String).split(':');
+        if (timeParts.length == 2) {
+          _reminderTime = TimeOfDay(
+            hour: int.parse(timeParts[0]),
+            minute: int.parse(timeParts[1]),
+          );
+        }
+      }
+    } else {
+      _serviceDate = DateTime.now();
+    }
+  }
 
   @override
   void dispose() {
@@ -76,9 +114,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   Future<void> _saveService() async {
     if (!_formKey.currentState!.validate() || _selectedVehicleId == null) {
       if (_selectedVehicleId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Silakan pilih kendaraan')),
-        );
+        CustomToast.showWarning(context, title: 'Input Diperlukan', message: 'Silakan pilih kendaraan terlebih dahulu.');
       }
       return;
     }
@@ -87,8 +123,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
 
     try {
       final String uid = _auth.currentUser!.uid;
-      
-      await _firestore.collection('services').add({
+      final Map<String, dynamic> serviceData = {
         'userId': uid,
         'vehicleId': _selectedVehicleId,
         'serviceDate': Timestamp.fromDate(_serviceDate),
@@ -97,25 +132,30 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
         'cost': double.parse(_costController.text),
         'nextServiceDate': _nextServiceDate != null ? Timestamp.fromDate(_nextServiceDate!) : null,
         'reminderTime': _reminderTime != null ? '${_reminderTime!.hour.toString().padLeft(2, '0')}:${_reminderTime!.minute.toString().padLeft(2, '0')}' : null,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      if (!_isEditMode) {
+        serviceData['createdAt'] = FieldValue.serverTimestamp();
+        await _firestore.collection('services').add(serviceData);
+      } else {
+        await _firestore.collection('services').doc(widget.serviceId).update(serviceData);
+      }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Service berhasil ditambahkan'),
-            backgroundColor: Colors.green,
-          ),
+        CustomToast.showSuccess(
+          context,
+          title: 'Berhasil',
+          message: _isEditMode ? 'Data servis berhasil diperbarui.' : 'Data servis kendaraan Anda telah disimpan.',
         );
-        Navigator.pop(context);
+        Navigator.pop(context, true); // Return true to signal refresh if needed
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan data: $e'),
-            backgroundColor: Colors.red,
-          ),
+        CustomToast.showError(
+          context,
+          title: _isEditMode ? 'Gagal Memperbarui Data' : 'Gagal Menyimpan Data',
+          message: e.toString(),
         );
       }
     } finally {
@@ -127,7 +167,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Servis'),
+        title: Text(_isEditMode ? 'Edit Servis' : 'Tambah Servis'),
         backgroundColor: const Color(0xFF8100D1),
         foregroundColor: Colors.white,
       ),
@@ -285,7 +325,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
 
                     // Tombol Simpan
                     ElevatedButton(
-                      onPressed: _saveService,
+                      onPressed: _isLoading ? null : _saveService,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF8100D1),
                         foregroundColor: Colors.white,
@@ -294,9 +334,9 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Simpan Servis',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      child: Text(
+                        _isEditMode ? 'Update Servis' : 'Simpan Servis',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
