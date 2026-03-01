@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../utils/custom_toast.dart';
+import 'package:flutter/material.dart';
 
 class AddServiceScreen extends StatefulWidget {
   final String? serviceId;
@@ -114,7 +114,12 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   Future<void> _saveService() async {
     if (!_formKey.currentState!.validate() || _selectedVehicleId == null) {
       if (_selectedVehicleId == null) {
-        CustomToast.showWarning(context, title: 'Input Diperlukan', message: 'Silakan pilih kendaraan terlebih dahulu.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Silakan pilih kendaraan terlebih dahulu.'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
       return;
     }
@@ -143,19 +148,21 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
       }
 
       if (mounted) {
-        CustomToast.showSuccess(
-          context,
-          title: 'Berhasil',
-          message: _isEditMode ? 'Data servis berhasil diperbarui.' : 'Data servis kendaraan Anda telah disimpan.',
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isEditMode ? 'Data servis berhasil diperbarui.' : 'Data servis kendaraan Anda telah disimpan.'),
+            backgroundColor: Colors.green,
+          ),
         );
         Navigator.pop(context, true); // Return true to signal refresh if needed
       }
     } catch (e) {
       if (mounted) {
-        CustomToast.showError(
-          context,
-          title: _isEditMode ? 'Gagal Memperbarui Data' : 'Gagal Menyimpan Data',
-          message: e.toString(),
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isEditMode ? 'Gagal Memperbarui Data: $e' : 'Gagal Menyimpan Data: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

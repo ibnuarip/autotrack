@@ -34,53 +34,90 @@ class _HelpScreenState extends State<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: Colors.white,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Pusat Bantuan'),
+        title: const Text('Bantuan'),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // COMPACT HEADER
+            // PREMIUM GRADIENT HEADER
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+              padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
               decoration: const BoxDecoration(
-                color: Colors.white,
+                gradient: LinearGradient(
+                  colors: [Color(0xFF8100D1), Color(0xFF6A00AF)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
+                  bottomLeft: Radius.circular(40),
+                  bottomRight: Radius.circular(40),
                 ),
               ),
               child: const Column(
                 children: [
-                  Text(
-                    'Apa yang bisa kami bantu?',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
+                   Icon(Icons.help_center_rounded, size: 64, color: Colors.white24),
+                   SizedBox(height: 16),
+                   Text(
+                    'Pusat Informasi AutoTrack',
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
                   Text(
-                    'Temukan jawaban cepat untuk pertanyaan Anda di sini.',
+                    'Kelola kendaraan Anda dengan lebih cerdas dan efisien.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, fontSize: 14),
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 24),
+            // INTRODUCTORY SECTION
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Tentang AutoTrack',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildIntroParagraph(
+                    'AutoTrack adalah solusi cerdas untuk memantau kesehatan kendaraan Anda secara real-time. Kami percaya bahwa perawatan yang terjadwal bukan hanya soal kenyamanan, tetapi juga kunci utama keselamatan Anda di jalan raya.',
+                  ),
+                  _buildIntroParagraph(
+                    'Dengan fitur pencatatan servis yang detail, Anda dapat memantau pengeluaran perawatan berkala dan mendapatkan estimasi waktu servis berikutnya. Ini membantu Anda menghindari biaya perbaikan yang tak terduga akibat kerusakan berat.',
+                  ),
+                  _buildIntroParagraph(
+                    'Antarmuka yang premium dan intuitif memastikan setiap pengguna dapat mengelola riwayat kendaraan mereka dengan mudah, memberikan ketenangan pikiran dalam setiap perjalanan.',
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
 
             // FAQ SECTION
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Text(
-                'Pertanyaan Sering Diajukan (FAQ)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: Row(
+                children: [
+                  Icon(Icons.question_answer_rounded, color: Color(0xFF8100D1), size: 24),
+                  SizedBox(width: 12),
+                  Text(
+                    'Pertanyaan Populer',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
+                  ),
+                ],
               ),
             ),
             
@@ -88,111 +125,69 @@ class _HelpScreenState extends State<HelpScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _faqs.length,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               itemBuilder: (context, index) {
                 return Container(
-                  margin: const EdgeInsets.only(bottom: 12),
+                  margin: const EdgeInsets.only(bottom: 16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.grey[100]!),
                     boxShadow: [
-                      BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
-                    ],
-                  ),
-                  child: ExpansionTile(
-                    title: Text(
-                      _faqs[index]['question']!,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF2D2D2D)),
-                    ),
-                    childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    iconColor: const Color(0xFF8100D1),
-                    collapsedIconColor: Colors.grey,
-                    shape: const Border(),
-                    children: [
-                      Text(
-                        _faqs[index]['answer']!,
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.5),
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.04),
+                        blurRadius: 15,
+                        offset: const Offset(0, 6),
                       ),
                     ],
+                  ),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                    child: ExpansionTile(
+                      title: Text(
+                        _faqs[index]['question']!,
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF2D2D2D)),
+                      ),
+                      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                      iconColor: const Color(0xFF8100D1),
+                      collapsedIconColor: Colors.grey[400],
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF8100D1).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            _faqs[index]['answer']!,
+                            style: TextStyle(color: Colors.grey[700], fontSize: 14, height: 1.6),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
             ),
-
-            const SizedBox(height: 24),
-
-            // CONTACT SECTION
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Text(
-                'Masih butuh bantuan?',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Hubungi Tim Dukungan Kami',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Kami siap membantu Anda kapan saja melalui saluran di bawah ini.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildContactButton(
-                          Icons.email_outlined,
-                          'Email',
-                          () {},
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildContactButton(
-                          Icons.chat_bubble_outline_rounded,
-                          'WhatsApp',
-                          () {},
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 60),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildContactButton(IconData icon, String label, VoidCallback onTap) {
-    return ElevatedButton.icon(
-      onPressed: onTap,
-      icon: Icon(icon, size: 18),
-      label: Text(label),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: const Color(0xFF8100D1),
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  Widget _buildIntroParagraph(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        text,
+        textAlign: TextAlign.justify,
+        style: TextStyle(
+          color: Colors.grey[700],
+          fontSize: 15,
+          height: 1.6,
+          fontWeight: FontWeight.w400,
+        ),
       ),
     );
   }

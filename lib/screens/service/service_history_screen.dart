@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../../utils/custom_toast.dart';
+import 'package:flutter/material.dart';
 import 'add_service_screen.dart';
 
 class ServiceHistoryScreen extends StatefulWidget {
@@ -357,18 +357,20 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
               try {
                 await _firestore.collection('services').doc(serviceId).delete();
                 if (context.mounted) {
-                  CustomToast.showSuccess(
-                    context,
-                    title: 'Berhasil',
-                    message: 'Data servis berhasil dihapus.',
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Data servis berhasil dihapus.'),
+                      backgroundColor: Colors.green,
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  CustomToast.showError(
-                    context,
-                    title: 'Gagal Menghapus',
-                    message: e.toString(),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Gagal Menghapus: $e'),
+                      backgroundColor: Colors.red,
+                    ),
                   );
                 }
               }
