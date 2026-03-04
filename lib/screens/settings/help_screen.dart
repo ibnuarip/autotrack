@@ -80,31 +80,6 @@ class _HelpScreenState extends State<HelpScreen> {
               ),
             ),
 
-            // INTRODUCTORY SECTION
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Tentang AutoTrack',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1E1E1E)),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildIntroParagraph(
-                    'AutoTrack adalah solusi cerdas untuk memantau kesehatan kendaraan Anda secara real-time. Kami percaya bahwa perawatan yang terjadwal bukan hanya soal kenyamanan, tetapi juga kunci utama keselamatan Anda di jalan raya.',
-                  ),
-                  _buildIntroParagraph(
-                    'Dengan fitur pencatatan servis yang detail, Anda dapat memantau pengeluaran perawatan berkala dan mendapatkan estimasi waktu servis berikutnya. Ini membantu Anda menghindari biaya perbaikan yang tak terduga akibat kerusakan berat.',
-                  ),
-                  _buildIntroParagraph(
-                    'Antarmuka yang premium dan intuitif memastikan setiap pengguna dapat mengelola riwayat kendaraan mereka dengan mudah, memberikan ketenangan pikiran dalam setiap perjalanan.',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 32),
 
             // FAQ SECTION
             const Padding(
@@ -176,19 +151,5 @@ class _HelpScreenState extends State<HelpScreen> {
     );
   }
 
-  Widget _buildIntroParagraph(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        text,
-        textAlign: TextAlign.justify,
-        style: TextStyle(
-          color: Colors.grey[700],
-          fontSize: 15,
-          height: 1.6,
-          fontWeight: FontWeight.w400,
-        ),
-      ),
-    );
-  }
+
 }

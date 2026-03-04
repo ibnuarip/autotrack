@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         const SizedBox(height: 12),
                         _buildMaintenanceTips(),
                         const SizedBox(height: 24),
-                        _buildSectionHeader('Servis Terjadwal'),
+                        _buildSectionHeader('Servis Selanjutnya'),
                         const SizedBox(height: 12),
                         _buildUpcomingServicesSection(),
                         const SizedBox(height: 100), // Space for FAB
@@ -475,12 +475,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           .collection('services')
           .where('userId', isEqualTo: _currentUser!.uid)
           .where('nextServiceDate', isGreaterThanOrEqualTo: Timestamp.now())
+          .where('nextServiceDate', isLessThanOrEqualTo: Timestamp.fromDate(DateTime.now().add(const Duration(days: 2))))
           .orderBy('nextServiceDate', descending: false)
           .limit(3)
           .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return _buildEmptyState('Tidak ada servis terjadwal', Icons.calendar_today_outlined);
+          return _buildEmptyState('Tidak ada servis dalam 2 hari ke depan', Icons.calendar_today_outlined);
         }
 
         final docs = snapshot.data!.docs;

@@ -112,126 +112,210 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     }
   }
 
+  Widget _buildShadowContainer(Widget child) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  InputDecoration _getInputDecoration(String label, IconData icon, [String? hint]) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      labelStyle: TextStyle(color: Colors.grey[600]),
+      prefixIcon: Icon(icon, color: const Color(0xFF8100D1)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF8100D1), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      filled: true,
+      fillColor: Colors.transparent, // Let the container's white color show
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Modern off-white background
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Kendaraan' : 'Tambah Kendaraan'),
-        backgroundColor: const Color(0xFF8100D1),
+        title: Text(
+          _isEditing ? 'Edit Kendaraan' : 'Tambah Kendaraan',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
       ),
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    DropdownButtonFormField<String>(
-                      value: _selectedType,
-                      decoration: const InputDecoration(
-                        labelText: 'Jenis Kendaraan',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.category),
+                    _buildShadowContainer(
+                      DropdownButtonFormField<String>(
+                        value: _selectedType,
+                        decoration: _getInputDecoration('Jenis Kendaraan', Icons.category),
+                        items: const [
+                          DropdownMenuItem(value: 'Motor', child: Text('Motor')),
+                          DropdownMenuItem(value: 'Mobil', child: Text('Mobil')),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _selectedType = value);
+                          }
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Pilih jenis kendaraan';
+                          }
+                          return null;
+                        },
                       ),
-                      items: const [
-                        DropdownMenuItem(value: 'Motor', child: Text('Motor')),
-                        DropdownMenuItem(value: 'Mobil', child: Text('Mobil')),
-                      ],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _selectedType = value);
-                        }
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Pilih jenis kendaraan';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nama Kendaraan',
-                        hintText: '( Contoh Beat)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.directions_car),
+                    const SizedBox(height: 20),
+                    _buildShadowContainer(
+                      TextFormField(
+                        controller: _nameController,
+                        decoration: _getInputDecoration('Nama Kendaraan', Icons.directions_car, '(Contoh: Beat)'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nama kendaraan wajib diisi';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Nama kendaraan wajib diisi';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _selectedBrand,
-                      decoration: const InputDecoration(
-                        labelText: 'Merek / Brand',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.branding_watermark),
+                    const SizedBox(height: 20),
+                    _buildShadowContainer(
+                      DropdownButtonFormField<String>(
+                        value: _selectedBrand,
+                        decoration: _getInputDecoration('Merek / Brand', Icons.branding_watermark),
+                        items: _brands.map((brand) {
+                          return DropdownMenuItem(value: brand, child: Text(brand));
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _selectedBrand = value);
+                          }
+                        },
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Pilih merek kendaraan';
+                          }
+                          return null;
+                        },
                       ),
-                      items: _brands.map((brand) {
-                        return DropdownMenuItem(value: brand, child: Text(brand));
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _selectedBrand = value);
-                        }
-                      },
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Pilih merek kendaraan';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _plateController,
-                      decoration: const InputDecoration(
-                        labelText: 'Nomor Polisi',
-                        hintText: 'XX XXXX XXX',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.pin),
+                    const SizedBox(height: 20),
+                    _buildShadowContainer(
+                      TextFormField(
+                        controller: _plateController,
+                        decoration: _getInputDecoration('Nomor Polisi', Icons.pin, 'B 1234 ABC'),
+                        textCapitalization: TextCapitalization.characters,
+                        inputFormatters: [
+                          TextInputFormatter.withFunction((oldValue, newValue) {
+                            return newValue.copyWith(text: newValue.text.toUpperCase());
+                          }),
+                        ],
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Nomor polisi wajib diisi';
+                          }
+                          if (value.length < 5) {
+                            return 'Nomor polisi minimal 5 karakter';
+                          }
+                          return null;
+                        },
                       ),
-                      textCapitalization: TextCapitalization.characters,
-                      inputFormatters: [
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          return newValue.copyWith(text: newValue.text.toUpperCase());
-                        }),
-                      ],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Nomor polisi wajib diisi';
-                        }
-                        if (value.length < 5) {
-                          return 'Nomor polisi minimal 5 karakter';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 32),
-                    ElevatedButton(
-                      onPressed: _saveVehicle,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8100D1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    const SizedBox(height: 40),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF8100D1).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _saveVehicle,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            alignment: Alignment.center,
+                            constraints: const BoxConstraints(minHeight: 56),
+                            child: Text(
+                              _isEditing ? 'Simpan Perubahan' : 'Simpan Kendaraan',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        _isEditing ? 'Simpan Perubahan' : 'Simpan Kendaraan',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
                     ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),

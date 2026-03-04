@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+import '../../services/notification_service.dart';
 
 class AddServiceScreen extends StatefulWidget {
   final String? serviceId;
@@ -111,6 +111,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     }
   }
 
+
   Future<void> _saveService() async {
     if (!_formKey.currentState!.validate() || _selectedVehicleId == null) {
       if (_selectedVehicleId == null) {
@@ -140,11 +141,32 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
+      String docId;
       if (!_isEditMode) {
         serviceData['createdAt'] = FieldValue.serverTimestamp();
-        await _firestore.collection('services').add(serviceData);
+        final result = await _firestore.collection('services').add(serviceData);
+        docId = result.id;
       } else {
-        await _firestore.collection('services').doc(widget.serviceId).update(serviceData);
+        docId = widget.serviceId!;
+        await _firestore.collection('services').doc(docId).update(serviceData);
+      }
+
+      // Schedule notification if nextServiceDate exists
+      if (_nextServiceDate != null) {
+        try {
+          final vehicleDoc = await _firestore.collection('vehicles').doc(_selectedVehicleId).get();
+          if (vehicleDoc.exists) {
+            final vehicleName = (vehicleDoc.data() as Map<String, dynamic>)['name'] ?? 'Kendaraan';
+            await NotificationService().scheduleServiceReminder(
+              id: docId.hashCode,
+              vehicleName: vehicleName,
+              nextServiceDate: _nextServiceDate!,
+            );
+          }
+        } catch (e) {
+          debugPrint('Notification scheduling failed: $e');
+          // We don't rethrow here so the user still sees a success message for the Firestore save
+        }
       }
 
       if (mounted) {
@@ -154,7 +176,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context, true); // Return true to signal refresh if needed
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -170,18 +192,81 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
     }
   }
 
+  Widget _buildShadowContainer(Widget child) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+  }
+
+  InputDecoration _getInputDecoration(String label, IconData icon, [String? hint]) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      labelStyle: TextStyle(color: Colors.grey[600]),
+      prefixIcon: Icon(icon, color: const Color(0xFF8100D1)),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFF8100D1), width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
+      filled: true,
+      fillColor: Colors.transparent,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50], // Modern off-white background
       appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Servis' : 'Tambah Servis'),
-        backgroundColor: const Color(0xFF8100D1),
+        title: Text(
+          _isEditMode ? 'Edit Servis' : 'Tambah Servis',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(20.0),
+              padding: const EdgeInsets.all(24.0),
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -199,153 +284,190 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                         }
                         
                         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                          return const Text('Tidak ada kendaraan ditemukan');
+                          return _buildShadowContainer(
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Text(
+                                'Tidak ada kendaraan ditemukan. Silakan tambah kendaraan terlebih dahulu.',
+                                style: TextStyle(color: Colors.grey[600]),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          );
                         }
                         
                         var vehicleDocs = snapshot.data!.docs;
                         
-                        return DropdownButtonFormField<String>(
-                          value: _selectedVehicleId,
-                          decoration: const InputDecoration(
-                            labelText: 'Pilih Kendaraan',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.directions_car),
+                        return _buildShadowContainer(
+                          DropdownButtonFormField<String>(
+                            value: _selectedVehicleId,
+                            decoration: _getInputDecoration('Pilih Kendaraan', Icons.directions_car),
+                            items: vehicleDocs.map((doc) {
+                              var data = doc.data() as Map<String, dynamic>;
+                              return DropdownMenuItem<String>(
+                                value: doc.id,
+                                child: Text('${data['name']} - ${data['plateNumber']}'),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() => _selectedVehicleId = value);
+                            },
+                            validator: (value) => value == null ? 'Kendaraan wajib dipilih' : null,
                           ),
-                          items: vehicleDocs.map((doc) {
-                            var data = doc.data() as Map<String, dynamic>;
-                            return DropdownMenuItem<String>(
-                              value: doc.id,
-                              child: Text('${data['name']} - ${data['plateNumber']}'),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setState(() => _selectedVehicleId = value);
-                          },
-                          validator: (value) => value == null ? 'Kendaraan wajib dipilih' : null,
                         );
                       },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     
                     // Tanggal Servis
-                    InkWell(
-                      onTap: () => _selectServiceDate(context),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Tanggal Servis',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.calendar_today),
-                        ),
-                        child: Text(
-                          '${_serviceDate.day}/${_serviceDate.month}/${_serviceDate.year}',
+                    _buildShadowContainer(
+                      InkWell(
+                        onTap: () => _selectServiceDate(context),
+                        borderRadius: BorderRadius.circular(16),
+                        child: InputDecorator(
+                          decoration: _getInputDecoration('Tanggal Servis', Icons.calendar_today),
+                          child: Text(
+                            '${_serviceDate.day}/${_serviceDate.month}/${_serviceDate.year}',
+                            style: const TextStyle(fontSize: 16),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Jenis Servis
-                    TextFormField(
-                      controller: _serviceTypeController,
-                      decoration: const InputDecoration(
-                        labelText: 'Jenis Servis',
-                        hintText: 'Ganti Oli, Servis Rutin, dll',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.build),
+                    _buildShadowContainer(
+                      TextFormField(
+                        controller: _serviceTypeController,
+                        decoration: _getInputDecoration('Jenis Servis', Icons.build, 'Ganti Oli, Servis Rutin, dll'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Jenis servis wajib diisi';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Jenis servis wajib diisi';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Deskripsi
-                    TextFormField(
-                      controller: _descriptionController,
-                      maxLines: 3,
-                      decoration: const InputDecoration(
-                        labelText: 'Deskripsi (Opsional)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.description),
+                    _buildShadowContainer(
+                      TextFormField(
+                        controller: _descriptionController,
+                        maxLines: 3,
+                        decoration: _getInputDecoration('Deskripsi (Opsional)', Icons.description),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Biaya
-                    TextFormField(
-                      controller: _costController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Biaya (Rp)',
-                        border: OutlineInputBorder(),
-                        prefixIcon: Icon(Icons.payments),
+                    _buildShadowContainer(
+                      TextFormField(
+                        controller: _costController,
+                        keyboardType: TextInputType.number,
+                        decoration: _getInputDecoration('Biaya (Rp)', Icons.payments),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Biaya wajib diisi';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Biaya harus berupa angka';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Biaya wajib diisi';
-                        }
-                        if (double.tryParse(value) == null) {
-                          return 'Biaya harus berupa angka';
-                        }
-                        return null;
-                      },
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Tanggal Servis Berikutnya (Opsional)
-                    InkWell(
-                      onTap: () => _selectNextServiceDate(context),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Tanggal Servis Berikutnya (Opsional)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.event_repeat),
-                        ),
-                        child: Text(
-                          _nextServiceDate == null
-                              ? 'Pilih tanggal (jika ada)'
-                              : '${_nextServiceDate!.day}/${_nextServiceDate!.month}/${_nextServiceDate!.year}',
+                    _buildShadowContainer(
+                      InkWell(
+                        onTap: () => _selectNextServiceDate(context),
+                        borderRadius: BorderRadius.circular(16),
+                        child: InputDecorator(
+                          decoration: _getInputDecoration('Servis Berikutnya (Opsional)', Icons.event_repeat),
+                          child: Text(
+                            _nextServiceDate == null
+                                ? 'Pilih tanggal (jika ada)'
+                                : '${_nextServiceDate!.day}/${_nextServiceDate!.month}/${_nextServiceDate!.year}',
+                            style: TextStyle(
+                              fontSize: 16, 
+                              color: _nextServiceDate == null ? Colors.grey[600] : Colors.black87
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     // Waktu Pengingat (Opsional)
-                    InkWell(
-                      onTap: () => _selectReminderTime(context),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Waktu Pengingat (Opsional)',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.access_time),
-                        ),
-                        child: Text(
-                          _reminderTime == null
-                              ? 'Pilih waktu pengingat'
-                              : _reminderTime!.format(context),
+                    _buildShadowContainer(
+                      InkWell(
+                        onTap: () => _selectReminderTime(context),
+                        borderRadius: BorderRadius.circular(16),
+                        child: InputDecorator(
+                          decoration: _getInputDecoration('Waktu Pengingat (Opsional)', Icons.access_time),
+                          child: Text(
+                            _reminderTime == null
+                                ? 'Pilih waktu pengingat'
+                                : _reminderTime!.format(context),
+                            style: TextStyle(
+                              fontSize: 16, 
+                              color: _reminderTime == null ? Colors.grey[600] : Colors.black87
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 40),
 
                     // Tombol Simpan
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _saveService,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8100D1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF8100D1).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveService,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            alignment: Alignment.center,
+                            constraints: const BoxConstraints(minHeight: 56),
+                            child: Text(
+                              _isEditMode ? 'Update Servis' : 'Simpan Servis',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      child: Text(
-                        _isEditMode ? 'Update Servis' : 'Simpan Servis',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
                     ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),

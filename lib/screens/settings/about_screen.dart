@@ -44,8 +44,9 @@ class AboutScreen extends StatelessWidget {
                     color: colorScheme.onSurfaceVariant,
                   ),
             ),
-            const SizedBox(height: 32),
-            // Description Card
+            const SizedBox(height: 8),
+            const SizedBox(height: 24),
+            // Tentang AutoTrack Detail
             Card(
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -54,19 +55,52 @@ class AboutScreen extends StatelessWidget {
                   color: colorScheme.outlineVariant,
                 ),
               ),
-              child: const Padding(
-                padding: EdgeInsets.all(20.0),
-                child: Text(
-                  'AutoTrack adalah aplikasi untuk mencatat dan memantau riwayat servis motor dan mobil agar perawatan kendaraan lebih teratur dan terdokumentasi.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 15,
-                    height: 1.5,
-                  ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tentang AutoTrack',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'AutoTrack adalah solusi cerdas untuk memantau kesehatan kendaraan Anda secara real-time. Kami percaya bahwa perawatan yang terjadwal bukan hanya soal kenyamanan, tetapi juga kunci utama keselamatan Anda di jalan raya.',
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Dengan fitur pencatatan servis yang detail, Anda dapat memantau pengeluaran perawatan berkala dan mendapatkan estimasi waktu servis berikutnya. Ini membantu Anda menghindari biaya perbaikan yang tak terduga akibat kerusakan berat.',
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                        height: 1.6,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Antarmuka yang premium dan intuitif memastikan setiap pengguna dapat mengelola riwayat kendaraan mereka dengan mudah, memberikan ketenangan pikiran dalam setiap perjalanan.',
+                      textAlign: TextAlign.justify,
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 14,
+                        height: 1.6,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
             // Developer Info Card
             Card(
               elevation: 0,
