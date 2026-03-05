@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../utils/custom_toast.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String currentName;
@@ -47,10 +46,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await user.updateDisplayName(_nameController.text.trim());
 
         if (mounted) {
-          CustomToast.showSuccess(
-            context,
-            title: 'Berhasil',
-            message: 'Nama profil Anda telah diperbarui.',
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Nama profil Anda telah diperbarui.'),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pop(context);
         }
@@ -63,10 +63,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           detailError = 'Koneksi ke database terputus. Silakan lakukan STOP dan RUN ulang aplikasi (Full Restart).';
         }
         
-        CustomToast.showError(
-          context,
-          title: 'Gagal Update',
-          message: detailError,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(detailError),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../utils/custom_toast.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -48,10 +47,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         await user.updatePassword(_newPasswordController.text.trim());
         
         if (mounted) {
-          CustomToast.showSuccess(
-            context,
-            title: 'Berhasil',
-            message: 'Password Anda telah berhasil diperbarui.',
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Password Anda telah berhasil diperbarui.'),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pop(context);
         }
@@ -71,10 +71,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       }
       
       if (mounted) {
-        CustomToast.showError(
-          context,
-          title: 'Gagal Ganti Password',
-          message: errorMessage,
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {

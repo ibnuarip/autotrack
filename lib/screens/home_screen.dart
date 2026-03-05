@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import 'service/add_service_screen.dart';
 import 'vehicle/add_vehicle_screen.dart';
+import 'settings/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -207,8 +208,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       elevation: 0,
       actions: [
         IconButton(
-          icon: const Icon(Icons.logout, color: Colors.white),
-          onPressed: () => _authService.signOut(),
+          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+          onPressed: () {
+            // TODO: Navigate to notification center
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.person_outline_rounded, color: Colors.white),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfileScreen()),
+            );
+          },
         ),
       ],
       flexibleSpace: FlexibleSpaceBar(
@@ -231,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 30),
+                padding: const EdgeInsets.only(left: 20, bottom: 50),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,16 +297,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   Widget _buildStatisticsGrid() {
     return Column(
       children: [
+        // FEATURE CARD: MONTHLY SUMMARY
+        _buildMonthlyFeatureCard(),
+        const SizedBox(height: 16),
+        // SUPPORTING METRICS ROW
         Row(
           children: [
             Expanded(
               child: _buildStatCard(
-                'Kendaraan',
+                'Total Kendaraan',
                 _firestore
                     .collection('vehicles')
                     .where('userId', isEqualTo: _currentUser!.uid)
                     .snapshots(),
-                (s) => s.docs.length.toString(),
+                (s) => '${s.docs.length} Unit',
                 Icons.directions_car_filled_rounded,
                 Colors.blueAccent,
               ),
@@ -302,49 +318,99 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             const SizedBox(width: 12),
             Expanded(
               child: _buildStatCard(
-                'Servis Bulan Ini',
-                _getMonthlyServicesQuery().snapshots(),
-                (s) => s.docs.length.toString(),
-                Icons.handyman_rounded,
-                Colors.orangeAccent,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                'Total Servis',
+                'Riwayat Servis',
                 _firestore
                     .collection('services')
                     .where('userId', isEqualTo: _currentUser!.uid)
                     .snapshots(),
-                (s) => s.docs.length.toString(),
+                (s) => '${s.docs.length} Kali',
                 Icons.checklist_rtl_rounded,
                 Colors.purpleAccent,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _buildStatCard(
-                'Biaya (Bulan Ini)',
-                _getMonthlyServicesQuery().snapshots(),
-                (snapshot) {
-                  double total = 0;
-                  for (var doc in snapshot.docs) {
-                    total += ((doc.data() as Map<String, dynamic>)['cost'] ?? 0).toDouble();
-                  }
-                  return 'Rp ${total.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
-                },
-                Icons.account_balance_wallet_rounded,
-                Colors.greenAccent[700]!,
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildMonthlyFeatureCard() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _getMonthlyServicesQuery().snapshots(),
+      builder: (context, snapshot) {
+        double totalCost = 0;
+        int count = 0;
+        if (snapshot.hasData) {
+          count = snapshot.data!.docs.length;
+          for (var doc in snapshot.data!.docs) {
+            totalCost += ((doc.data() as Map<String, dynamic>)['cost'] ?? 0).toDouble();
+          }
+        }
+
+        final formattedCost = 'Rp ${totalCost.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF8100D1).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                   Text(
+                    'Pengeluaran ${_getMonth(DateTime.now().month)} ${DateTime.now().year}',
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '$count Servis',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                formattedCost,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -414,7 +480,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -486,67 +552,267 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
         final docs = snapshot.data!.docs;
         return Column(
-          children: docs.map((doc) => _buildServiceItem(doc)).toList(),
+          children: docs.map((doc) => _buildServiceItem(context, doc)).toList(),
         );
       },
     );
   }
 
-  Widget _buildServiceItem(DocumentSnapshot doc) {
+  Widget _buildServiceItem(BuildContext context, DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final nextDate = (data['nextServiceDate'] as Timestamp).toDate();
     final vehicleId = data['vehicleId'] as String;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showServiceDetailSheet(context, doc),
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.02),
+                blurRadius: 5,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-        ],
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.event_note_rounded, color: Colors.orange),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    FutureBuilder<DocumentSnapshot>(
+                      future: _firestore.collection('vehicles').doc(vehicleId).get(),
+                      builder: (context, snapshot) {
+                        String name = 'Memuat...';
+                        if (snapshot.hasData && snapshot.data!.exists) {
+                          name = (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Kendaraan';
+                        }
+                        return Text(
+                          name,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        );
+                      },
+                    ),
+                    Text(
+                      'Jadwal: ${nextDate.day} ${_getMonth(nextDate.month)} ${nextDate.year}',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+          ),
+        ),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.event_note_rounded, color: Colors.orange),
+    );
+  }
+
+  void _showServiceDetailSheet(BuildContext context, DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    final serviceDate = (data['serviceDate'] as Timestamp).toDate();
+    final nextDate = (data['nextServiceDate'] as Timestamp).toDate();
+    final vehicleId = data['vehicleId'] as String;
+    final serviceType = data['serviceType'] ?? '-';
+    final description = data['description'] ?? '-';
+    final cost = (data['cost'] ?? 0).toDouble();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(28),
+            topRight: Radius.circular(28),
           ),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF8100D1).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.build_rounded, color: Color(0xFF8100D1)),
+                  ),
+                  const SizedBox(width: 16),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Detail Rencana Servis',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2D3142),
+                          ),
+                        ),
+                        Text(
+                          'Informasi lengkap jadwal servis Anda',
+                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close_rounded, color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                children: [
+                  _buildDetailItem(
+                    'Kendaraan',
+                    FutureBuilder<DocumentSnapshot>(
+                      future: _firestore.collection('vehicles').doc(vehicleId).get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data!.exists) {
+                          final vData = snapshot.data!.data() as Map<String, dynamic>;
+                          return Text(
+                            '${vData['name']} (${vData['plateNumber']})',
+                            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          );
+                        }
+                        return const Text('Memuat...');
+                      },
+                    ),
+                    Icons.directions_car_rounded,
+                  ),
+                  _buildDetailItem(
+                    'Jenis Servis',
+                    Text(serviceType, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                    Icons.handyman_rounded,
+                  ),
+                  _buildDetailItem(
+                    'Terakhir Servis',
+                    Text(
+                      '${serviceDate.day} ${_getMonth(serviceDate.month)} ${serviceDate.year}',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                    ),
+                    Icons.history_rounded,
+                  ),
+                  _buildDetailItem(
+                    'Jadwal Servis Berikutnya',
+                    Text(
+                      '${nextDate.day} ${_getMonth(nextDate.month)} ${nextDate.year}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Colors.orange,
+                      ),
+                    ),
+                    Icons.event_available_rounded,
+                  ),
+                  _buildDetailItem(
+                    'Estimasi Biaya',
+                    Text(
+                      'Rp ${cost.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Colors.green),
+                    ),
+                    Icons.payments_rounded,
+                  ),
+                  _buildDetailItem(
+                    'Catatan / Deskripsi',
+                    Text(
+                      description,
+                      style: TextStyle(color: Colors.grey[700], fontSize: 14, height: 1.5),
+                    ),
+                    Icons.description_rounded,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF8100D1),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailItem(String label, Widget content, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[400]),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                FutureBuilder<DocumentSnapshot>(
-                  future: _firestore.collection('vehicles').doc(vehicleId).get(),
-                  builder: (context, snapshot) {
-                    String name = 'Memuat...';
-                    if (snapshot.hasData && snapshot.data!.exists) {
-                      name = (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Kendaraan';
-                    }
-                    return Text(
-                      name,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    );
-                  },
-                ),
                 Text(
-                  'Jadwal: ${nextDate.day} ${_getMonth(nextDate.month)} ${nextDate.year}',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
+                const SizedBox(height: 4),
+                content,
               ],
             ),
           ),
-          const Icon(Icons.chevron_right, color: Colors.grey),
         ],
       ),
     );

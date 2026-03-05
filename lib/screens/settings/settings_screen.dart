@@ -18,11 +18,22 @@ class SettingsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Pengaturan'),
+        title: const Text(
+          'Pengaturan',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF8100D1),
         elevation: 0,
-        surfaceTintColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
