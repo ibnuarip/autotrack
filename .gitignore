@@ -33,6 +33,31 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Android related
+**/android/local.properties
+**/android/**/generated
+**/android/app/google-services.json
+
+# iOS/macOS related
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/AppFrameworkInfo.plist
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/Generated.xcconfig
+**/macos/Flutter/flutter_export_environment.sh
+**/ios/Runner/Generated.xcconfig
+**/ios/Runner/flutter_export_environment.sh
+**/ios/Runner/GoogleService-Info.plist
+
+# Windows related
+**/windows/flutter/ephemeral/
+**/windows/flutter/generated/
+
+# Linux related
+**/linux/flutter/ephemeral/
+**/linux/flutter/generated/
+
 # Symbolication related
 app.*.symbols
 
@@ -44,5 +69,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Rekomendasi AI jangan push ke github
+# Secrets
+.env*
+*.keystore
+*.jks
 google-services.json
+GoogleService-Info.plist
