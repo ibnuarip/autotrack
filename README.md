@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/banner.png" width="100%" alt="AutoTrack Banner">
+  <img src="assets/images/banner.jpg" width="100%" alt="AutoTrack Banner">
 </p>
 
 # 🚗 AutoTrack - Smart Vehicle Management
