@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/images/flutter.png" width="100%" alt="AutoTrack Banner">
+  <img src="assets/images/flutter.png" width="500" alt="AutoTrack Banner">
 </p>
 
 # 🚗 AutoTrack - Smart Vehicle Management
@@ -18,7 +18,7 @@
 ## 📸 App Showcase
 
 <p align="center">
-  <img src="assets/images/mockup-mobile.png" width="80%" alt="AutoTrack App Mockup">
+  <img src="assets/images/mockup-mobile.png" width="280" alt="AutoTrack App Mockup">
 </p>
 
 ---
