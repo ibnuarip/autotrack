@@ -2,7 +2,7 @@
   <img src="assets/images/flutter.png" width="500" alt="AutoTrack Banner">
 </p>
 
-# 🚗 AutoTrack - Smart Vehicle Management
+# AutoTrack - Smart Vehicle Management
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-v3.9.2-blue?logo=flutter&logoColor=white" alt="Flutter Badge">
@@ -15,7 +15,7 @@
 
 ---
 
-## 📸 App Showcase
+## App Showcase
 
 <p align="center">
   <img src="assets/images/mockup-mobile.png" width="280" alt="AutoTrack App Mockup">
@@ -23,18 +23,18 @@
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-- **🏎 Complete Vehicle Management**: Track multiple vehicles, including cars and motorcycles.
-- **🛠 Service History Logging**: Keep detailed records of every maintenance, including cost and description.
-- **📅 Smart Reminders**: Automatically schedule and receive notifications for your next service.
-- **☁️ Real-time Cloud Sync**: Your data is always safe and synchronized across devices via Firebase Firestore.
-- **🔐 Secure Authentication**: Easy and secure login with Email or Google Sign-In.
-- **🔔 Interactive Notifications**: Get timely alerts for service updates and reminders.
+- **Complete Vehicle Management**: Track multiple vehicles, including cars and motorcycles.
+- **Service History Logging**: Keep detailed records of every maintenance, including cost and description.
+- **Smart Reminders**: Automatically schedule and receive notifications for your next service.
+- **Real-time Cloud Sync**: Your data is always safe and synchronized across devices via Firebase Firestore.
+- **Secure Authentication**: Easy and secure login with Email or Google Sign-In.
+- **Interactive Notifications**: Get timely alerts for service updates and reminders.
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 *   **Framework**: [Flutter](https://flutter.dev) (Dart)
 *   **Backend**: [Firebase](https://firebase.google.com) (Auth, Firestore, Messaging)
@@ -44,7 +44,7 @@
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 Follow these steps to set up the project on your local machine:
 
@@ -80,7 +80,7 @@ flutter run
 
 ---
 
-## 📝 License
+## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
