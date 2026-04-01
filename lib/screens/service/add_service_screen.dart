@@ -161,6 +161,8 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
               id: docId.hashCode,
               vehicleName: vehicleName,
               nextServiceDate: _nextServiceDate!,
+              hour: _reminderTime?.hour ?? 8,
+              minute: _reminderTime?.minute ?? 0,
             );
           }
         } catch (e) {

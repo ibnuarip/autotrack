@@ -45,46 +45,46 @@ class NotificationService {
     required int id, // This should be a hash of the docId
     required String vehicleName,
     required DateTime nextServiceDate,
+    int hour = 8,
+    int minute = 0,
   }) async {
     // Ensure ID is within 32-bit range for Android
     final int safeId = id.abs() % 1000000000;
     
     // Schedule H-2 Reminder (2 days before)
     final h2Date = nextServiceDate.subtract(const Duration(days: 2));
-    final now = DateTime.now();
+    final nowTz = tz.TZDateTime.now(tz.local);
 
-    if (h2Date.isAfter(now)) {
-      // Set to 09:00 AM
-      final scheduledH2 = tz.TZDateTime.from(
-        DateTime(h2Date.year, h2Date.month, h2Date.day, 9, 0),
-        tz.local,
-      );
+    final scheduledH2 = tz.TZDateTime.from(
+      DateTime(h2Date.year, h2Date.month, h2Date.day, hour, minute),
+      tz.local,
+    );
 
+    if (scheduledH2.isAfter(nowTz)) {
       await _notificationsPlugin.zonedSchedule(
         id: safeId * 2,
         title: 'Pengingat Servis H-2',
         body: 'Halo! Kendaraan $vehicleName Anda ada jadwal servis 2 hari lagi nih. Jangan lupa ya!',
         scheduledDate: scheduledH2,
         notificationDetails: _notificationDetails(),
-        androidScheduleMode: fln.AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: fln.AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
 
     // Schedule H-0 Reminder (Day of service)
-    if (nextServiceDate.isAfter(now)) {
-      // Set to 08:00 AM
-      final scheduledH0 = tz.TZDateTime.from(
-        DateTime(nextServiceDate.year, nextServiceDate.month, nextServiceDate.day, 8, 0),
-        tz.local,
-      );
+    final scheduledH0 = tz.TZDateTime.from(
+      DateTime(nextServiceDate.year, nextServiceDate.month, nextServiceDate.day, hour, minute),
+      tz.local,
+    );
 
+    if (scheduledH0.isAfter(nowTz)) {
       await _notificationsPlugin.zonedSchedule(
         id: (safeId * 2) + 1,
         title: 'Waktunya Servis Hari Ini!',
         body: 'Hari ini saatnya servis untuk $vehicleName. Yuk, ke bengkel sekarang agar performa tetap prima!',
         scheduledDate: scheduledH0,
         notificationDetails: _notificationDetails(),
-        androidScheduleMode: fln.AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: fln.AndroidScheduleMode.inexactAllowWhileIdle,
       );
     }
   }
