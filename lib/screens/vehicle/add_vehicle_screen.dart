@@ -24,6 +24,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   
   late String _selectedType;
   late String _selectedBrand;
+  late TextEditingController _customBrandController;
   bool _isLoading = false;
 
   final List<String> _brands = [
@@ -37,6 +38,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     'BMW',
     'Mercedes-Benz',
     'Nissan',
+    'Lainnya',
   ];
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -49,11 +51,17 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     super.initState();
     _nameController = TextEditingController(text: widget.vehicleData?['name'] ?? '');
     _plateController = TextEditingController(text: widget.vehicleData?['plateNumber'] ?? '');
+    _customBrandController = TextEditingController();
     _selectedType = widget.vehicleData?['type'] ?? 'Motor';
     
     final existingBrand = widget.vehicleData?['brand'];
-    if (existingBrand != null && _brands.contains(existingBrand)) {
-      _selectedBrand = existingBrand;
+    if (existingBrand != null) {
+      if (_brands.contains(existingBrand)) {
+        _selectedBrand = existingBrand;
+      } else {
+        _selectedBrand = 'Lainnya';
+        _customBrandController.text = existingBrand;
+      }
     } else {
       _selectedBrand = 'Honda';
     }
@@ -63,6 +71,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   void dispose() {
     _nameController.dispose();
     _plateController.dispose();
+    _customBrandController.dispose();
     super.dispose();
   }
 
@@ -73,10 +82,14 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
     try {
       final String uid = _auth.currentUser!.uid;
+      final String finalBrand = _selectedBrand == 'Lainnya' 
+          ? _customBrandController.text.trim()
+          : _selectedBrand;
+          
       final vehicleData = {
         'userId': uid,
         'name': _nameController.text.trim(),
-        'brand': _selectedBrand,
+        'brand': finalBrand,
         'plateNumber': _plateController.text.trim().toUpperCase(),
         'type': _selectedType,
         if (!_isEditing) 'createdAt': FieldValue.serverTimestamp(),
@@ -137,11 +150,11 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       prefixIcon: Icon(icon, color: const Color(0xFF8100D1)),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: Colors.grey[100]!, width: 1.5),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: BorderSide.none,
+        borderSide: BorderSide(color: Colors.grey[100]!, width: 1.5),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
@@ -149,14 +162,14 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        borderSide: const BorderSide(color: Colors.red, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Colors.red, width: 1.5),
       ),
       filled: true,
-      fillColor: Colors.transparent, // Let the container's white color show
+      fillColor: const Color(0xFFFBFBFE),
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     );
   }
@@ -199,6 +212,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         items: const [
                           DropdownMenuItem(value: 'Motor', child: Text('Motor')),
                           DropdownMenuItem(value: 'Mobil', child: Text('Mobil')),
+                          DropdownMenuItem(value: 'Roda Tiga', child: Text('Roda Tiga')),
                         ],
                         onChanged: (value) {
                           if (value != null) {
@@ -247,6 +261,22 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         },
                       ),
                     ),
+                    if (_selectedBrand == 'Lainnya') ...[
+                      const SizedBox(height: 20),
+                      _buildShadowContainer(
+                        TextFormField(
+                          controller: _customBrandController,
+                          decoration: _getInputDecoration('Tulis Merek Anda', Icons.edit_note, '(Contoh: Vespa / Tesla)'),
+                          textCapitalization: TextCapitalization.words,
+                          validator: (value) {
+                            if (_selectedBrand == 'Lainnya' && (value == null || value.trim().isEmpty)) {
+                              return 'Merek wajib diisi jika memilih Lainnya';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 20),
                     _buildShadowContainer(
                       TextFormField(
