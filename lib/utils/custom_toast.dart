@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 enum ToastType { success, error, info, warning }
 
 class CustomToast {
-  static bool showLoginSuccessToast = false;
-  static String? successMessage;
+  static final ValueNotifier<String?> loginSuccessNotifier = ValueNotifier<String?>(null);
+
+  static void notifyLoginSuccess(String message) {
+    loginSuccessNotifier.value = message;
+  }
 
   static void showSuccess(BuildContext context, {required String title, required String message}) {
     _showToast(context, title: title, message: message, type: ToastType.success);

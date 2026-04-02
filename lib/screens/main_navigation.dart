@@ -18,19 +18,29 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-    // Show success toast if coming from login/register
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (CustomToast.showLoginSuccessToast) {
-        CustomToast.showSuccess(
-          context,
-          title: 'Berhasil',
-          message: CustomToast.successMessage ?? 'Selamat datang kembali di AutoTrack!',
-        );
-        // Reset flag
-        CustomToast.showLoginSuccessToast = false;
-        CustomToast.successMessage = null;
-      }
-    });
+    // Berlangganan ke notifikasi login sukses agar muncul secara real-time
+    CustomToast.loginSuccessNotifier.addListener(_handleLoginSuccess);
+    
+    // Cek jika ada notifikasi yang tertunda saat widget pertama kali dibuat
+    WidgetsBinding.instance.addPostFrameCallback((_) => _handleLoginSuccess());
+  }
+
+  void _handleLoginSuccess() {
+    if (CustomToast.loginSuccessNotifier.value != null && mounted) {
+      CustomToast.showSuccess(
+        context,
+        title: 'Berhasil',
+        message: CustomToast.loginSuccessNotifier.value!,
+      );
+      // Reset notifier agar tidak muncul berulang kali
+      CustomToast.loginSuccessNotifier.value = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    CustomToast.loginSuccessNotifier.removeListener(_handleLoginSuccess);
+    super.dispose();
   }
 
   static const List<Widget> _screens = [

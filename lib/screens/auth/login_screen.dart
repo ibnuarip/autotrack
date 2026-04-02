@@ -34,12 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
           _emailController.text.trim(),
           _passwordController.text,
         );
-        CustomToast.showLoginSuccessToast = true;
-        CustomToast.successMessage = 'Selamat datang kembali di AutoTrack!';
         if (!mounted) return;
         // Navigation is handled by auth state listener in main.dart
       } catch (e) {
-        CustomToast.showLoginSuccessToast = false;
         if (!mounted) return;
         setState(() {
           _isLoading = false;
@@ -73,7 +70,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       // Navigation is handled by auth state listener in main.dart
     } catch (e) {
-      CustomToast.showLoginSuccessToast = false;
       if (!mounted) return;
       setState(() {
         _isLoading = false;

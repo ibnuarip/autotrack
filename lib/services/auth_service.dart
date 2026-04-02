@@ -12,6 +12,10 @@ class AuthService {
     try {
       UserCredential result = await _auth.signInWithEmailAndPassword(
           email: email, password: password);
+      
+      // Mengirimkan notifikasi login sukses secara real-time melalui ValueNotifier
+      CustomToast.notifyLoginSuccess('Selamat datang kembali di AutoTrack!');
+      
       return result.user;
     } catch (e) {
       rethrow;
@@ -40,9 +44,8 @@ class AuthService {
       // Once signed in, return the UserCredential
       UserCredential result = await _auth.signInWithCredential(credential);
       
-      // Set success flags for toast before navigation triggers
-      CustomToast.showLoginSuccessToast = true;
-      CustomToast.successMessage = 'Selamat datang kembali di AutoTrack!';
+      // Mengirimkan notifikasi login sukses secara real-time melalui ValueNotifier
+      CustomToast.notifyLoginSuccess('Berhasil login dengan Google!');
       
       // Ensure user document exists in Firestore
       if (result.user != null) {
