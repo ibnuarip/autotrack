@@ -19,6 +19,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
+    // Tambahkan listener untuk mendeteksi perubahan teks agar tombol Simpan bisa diaktifkan/nonaktifkan secara real-time
+    _nameController.addListener(_onNameChanged);
+  }
+
+  void _onNameChanged() {
+    setState(() {});
   }
 
   @override
@@ -46,12 +52,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await user.updateDisplayName(_nameController.text.trim());
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Nama profil Anda telah diperbarui.'),
-              backgroundColor: Colors.green,
-            ),
-          );
           Navigator.pop(context);
         }
       }
@@ -121,11 +121,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const Spacer(),
               ElevatedButton(
-                onPressed: _isLoading ? null : _updateProfile,
+                onPressed: (_isLoading || _nameController.text.trim() == widget.currentName) 
+                    ? null 
+                    : _updateProfile,
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 50),
                   backgroundColor: const Color(0xFF8100D1),
                   foregroundColor: Colors.white,
+                  disabledBackgroundColor: Colors.grey[300], // Opsional: Berikan warna berbeda saat disable
+                  disabledForegroundColor: Colors.grey[600],
                 ),
                 child: _isLoading
                     ? const SizedBox(
