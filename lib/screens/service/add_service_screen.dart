@@ -33,6 +33,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
   final TextEditingController _costController = TextEditingController();
   
   late Stream<QuerySnapshot> _vehicleStream;
+  bool _isRecurring = false;
   bool _isLoading = false;
   bool get _isEditMode => widget.serviceId != null;
 
@@ -45,6 +46,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
       _serviceDate = (data['serviceDate'] as Timestamp).toDate();
       _serviceTypeController.text = data['serviceType'] ?? '';
       _descriptionController.text = data['description'] ?? '';
+      _isRecurring = data['isRecurring'] ?? false;
       
       // Format existing cost with dots on load
       String costStr = (data['cost'] ?? 0).toString().split('.').first;
@@ -159,6 +161,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
         'cost': double.parse(_costController.text.replaceAll('.', '')),
         'nextServiceDate': _nextServiceDate != null ? Timestamp.fromDate(_nextServiceDate!) : null,
         'reminderTime': _reminderTime != null ? '${_reminderTime!.hour.toString().padLeft(2, '0')}:${_reminderTime!.minute.toString().padLeft(2, '0')}' : null,
+        'isRecurring': _isRecurring,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -381,6 +384,32 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                               const Icon(Icons.edit_calendar_rounded, size: 20, color: Color(0xFF8100D1)),
                             ],
                           ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _isRecurring ? const Color(0xFF8100D1).withOpacity(0.05) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: _isRecurring ? const Color(0xFF8100D1).withOpacity(0.2) : Colors.grey[100]!,
+                            width: 1.5,
+                          ),
+                        ),
+                        child: SwitchListTile(
+                          title: const Text(
+                            'Jadikan Rutinitas (Ulangi)',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          subtitle: const Text(
+                            'Aktifkan fitur ini jika servis ini dilakukan berkala.',
+                            style: TextStyle(fontSize: 11),
+                          ),
+                          value: _isRecurring,
+                          onChanged: (bool value) => setState(() => _isRecurring = value),
+                          activeColor: const Color(0xFF8100D1),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         ),
                       ),
                     ]),

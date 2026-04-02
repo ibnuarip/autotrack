@@ -564,67 +564,127 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final data = doc.data() as Map<String, dynamic>;
     final nextDate = (data['nextServiceDate'] as Timestamp).toDate();
     final vehicleId = data['vehicleId'] as String;
+    final isRecurring = data['isRecurring'] ?? false;
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: () => _showServiceDetailSheet(context, doc),
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 12),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.02),
-                blurRadius: 5,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: () => _showServiceDetailSheet(context, doc),
+          borderRadius: BorderRadius.circular(16),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: isRecurring ? const Color(0xFF8100D1).withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isRecurring ? Icons.cached_rounded : Icons.event_note_rounded,
+                    color: isRecurring ? const Color(0xFF8100D1) : Colors.orange,
+                  ),
                 ),
-                child: const Icon(Icons.event_note_rounded, color: Colors.orange),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    FutureBuilder<DocumentSnapshot>(
-                      future: _firestore.collection('vehicles').doc(vehicleId).get(),
-                      builder: (context, snapshot) {
-                        String name = 'Memuat...';
-                        if (snapshot.hasData && snapshot.data!.exists) {
-                          name = (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Kendaraan';
-                        }
-                        return Text(
-                          name,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        );
-                      },
-                    ),
-                    Text(
-                      'Jadwal: ${nextDate.day} ${_getMonth(nextDate.month)} ${nextDate.year}',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FutureBuilder<DocumentSnapshot>(
+                        future: _firestore.collection('vehicles').doc(vehicleId).get(),
+                        builder: (context, snapshot) {
+                          String name = 'Memuat...';
+                          if (snapshot.hasData && snapshot.data!.exists) {
+                            name = (snapshot.data!.data() as Map<String, dynamic>)['name'] ?? 'Kendaraan';
+                          }
+                          return Text(
+                            name,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          );
+                        },
+                      ),
+                      Text(
+                        'Jadwal: ${nextDate.day} ${_getMonth(nextDate.month)} ${nextDate.year}',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
-            ],
+                const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _handleCompleteRecurringService(BuildContext context, DocumentSnapshot doc) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final data = doc.data() as Map<String, dynamic>;
+    final DateTime serviceDate = (data['serviceDate'] as Timestamp).toDate();
+    final DateTime nextPlanDate = (data['nextServiceDate'] as Timestamp).toDate();
+    
+    // Hitung interval
+    final duration = nextPlanDate.difference(serviceDate);
+    final today = DateTime.now();
+    
+    // Hitung tanggal berikutnya (Gunakan plan terakhir sebagai basis)
+    DateTime nextScheduleDate = nextPlanDate.add(duration);
+    
+    // Failsafe: Jika interval terlalu pendek (kurang dari 1 hari) atau tanggal jadi masa lalu,
+    // maka jadwalkan otomatis 1 bulan dari rencana terakhir.
+    if (nextScheduleDate.isBefore(today.add(const Duration(hours: 1)))) {
+      nextScheduleDate = DateTime(nextPlanDate.year, nextPlanDate.month + 1, nextPlanDate.day);
+    }
+
+    try {
+      // 1. BUAT CATATAN RIWAYAT BARU (History)
+      final historyData = Map<String, dynamic>.from(data);
+      historyData['isRecurring'] = false;
+      historyData['serviceDate'] = Timestamp.fromDate(today);
+      historyData['nextServiceDate'] = null;
+      historyData['createdAt'] = FieldValue.serverTimestamp();
+      historyData['updatedAt'] = FieldValue.serverTimestamp();
+      
+      await _firestore.collection('services').add(historyData);
+
+      // 2. UPDATE JADWAL BERIKUTNYA (Reschedule)
+      await _firestore.collection('services').doc(doc.id).update({
+        'serviceDate': Timestamp.fromDate(today),
+        'nextServiceDate': Timestamp.fromDate(nextScheduleDate),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      
+      final formattedNextDate = "${nextScheduleDate.day} ${_getMonth(nextScheduleDate.month)} ${nextScheduleDate.year}";
+      
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Berhasil! Jadwal berikutnya diset ke: $formattedNextDate'),
+          backgroundColor: const Color(0xFF8100D1),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Gagal: $e'), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating),
+      );
+    }
   }
 
   void _showServiceDetailSheet(BuildContext context, DocumentSnapshot doc) {
@@ -764,21 +824,41 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     Icons.description_rounded,
                   ),
                   const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF8100D1),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  Row(
+                    children: [
+                      if (data['isRecurring'] == true) ...[
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.pop(context); // Tutup sheet dulu
+                              _handleCompleteRecurringService(context, doc);
+                            },
+                            icon: const Icon(Icons.check_circle_rounded, size: 18),
+                            label: const Text('Selesaikan', style: TextStyle(fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8100D1),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              elevation: 0,
+                            ),
+                          ),
                         ),
-                        elevation: 0,
+                        const SizedBox(width: 12),
+                      ],
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.grey[600],
+                            side: BorderSide(color: Colors.grey[300]!),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ),
                       ),
-                      child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
+                    ],
                   ),
                   const SizedBox(height: 40),
                 ],
