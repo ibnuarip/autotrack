@@ -71,249 +71,253 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: Container(
-          margin: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: isDark ? Colors.grey[900] : Colors.grey[100],
-            shape: BoxShape.circle,
+      backgroundColor: isDark ? const Color(0xFF0F0C29) : const Color(0xFFF8F9FE),
+      body: Stack(
+        children: [
+          // Decorative Background Blobs
+          Positioned(
+            top: -100,
+            right: -100,
+            child: _buildBackgroundCircle(isDark ? const Color(0xFF8100D1).withOpacity(0.1) : const Color(0xFF8100D1).withOpacity(0.05), 300),
           ),
-          child: IconButton(
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              size: 20,
-              color: isDark ? Colors.white : const Color(0xFF8100D1),
-            ),
-            onPressed: () => Navigator.pop(context),
+          Positioned(
+            bottom: -50,
+            left: -50,
+            child: _buildBackgroundCircle(isDark ? const Color(0xFF302B63).withOpacity(0.1) : const Color(0xFF8100D1).withOpacity(0.03), 200),
           ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Form(
-            key: _formKey,
+
+          SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 10),
-                // Premium Icon Header
-                Center(
-                  child: TweenAnimationBuilder<double>(
-                    duration: const Duration(milliseconds: 800),
-                    tween: Tween(begin: 0.0, end: 1.0),
-                    builder: (context, value, child) {
-                      return Transform.scale(
-                        scale: value,
-                        child: Opacity(
-                          opacity: value,
-                          child: Container(
-                            height: 80,
-                            width: 80,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  const Color(0xFF8100D1),
-                                  const Color(0xFF8100D1).withOpacity(0.7),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF8100D1).withOpacity(0.2),
-                                  blurRadius: 15,
-                                  spreadRadius: 2,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.lock_reset_rounded,
-                              size: 40,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 32),
-                Text(
-                  'Lupa Password?',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                    color: isDark ? Colors.white : const Color(0xFF1A1A1A),
-                  ),
-                ),
-                const SizedBox(height: 10),
+                // Custom App Bar
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    'Masukkan email kamu untuk mendapatkan tautan pemulihan kata sandi.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      height: 1.5,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 48),
-                
-                // Email field
-                Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[900] : Colors.grey[50],
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      if (!isDark)
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                    ],
-                  ),
-                  child: TextFormField(
-                    controller: _emailController,
-                    autofillHints: const [AutofillHints.email],
-                    keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: isDark ? Colors.white : Colors.black87,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: 'Alamat Email',
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.grey[500] : Colors.grey[600],
-                        fontSize: 14,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.email_outlined,
-                        color: const Color(0xFF8100D1).withOpacity(0.7),
-                      ),
-                      floatingLabelStyle: const TextStyle(
-                        color: Color(0xFF8100D1),
-                        fontWeight: FontWeight.bold,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Color(0xFF8100D1), width: 1.5),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                      filled: true,
-                      fillColor: Colors.transparent,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Email tidak boleh kosong';
-                      }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                        return 'Format email tidak valid';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 32),
-                
-                // Reset button
-                Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: _isLoading
-                          ? [Colors.grey, Colors.grey]
-                          : [const Color(0xFF8100D1), const Color(0xFFB500B2)],
-                    ),
-                    boxShadow: [
-                      if (!_isLoading)
-                        BoxShadow(
-                          color: const Color(0xFF8100D1).withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                    ],
-                  ),
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _resetPassword,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      foregroundColor: Colors.white,
-                      shadowColor: Colors.transparent,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      padding: EdgeInsets.zero,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              color: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
                             ),
-                          )
-                        : const Text(
-                            'Kirim Tautan Pemulihan',
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 18,
+                          color: isDark ? Colors.white : const Color(0xFF8100D1),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 20),
+                          
+                          // Illustrative Header
+                          TweenAnimationBuilder<double>(
+                            duration: const Duration(milliseconds: 1000),
+                            tween: Tween(begin: 0.0, end: 1.0),
+                            curve: Curves.elasticOut,
+                            builder: (context, value, child) {
+                              return Transform.scale(
+                                scale: value,
+                                child: Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(0xFF8100D1).withOpacity(0.15),
+                                        blurRadius: 40,
+                                        spreadRadius: 5,
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Icon(
+                                    Icons.lock_person_rounded,
+                                    size: 64,
+                                    color: Color(0xFF8100D1),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          
+                          const SizedBox(height: 40),
+                          
+                          Text(
+                            'Lupa Password?',
+                            textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.5,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -1,
+                              color: isDark ? Colors.white : const Color(0xFF2D3436),
                             ),
                           ),
+                          
+                          const SizedBox(height: 12),
+                          
+                          Text(
+                            'Masukkan alamat email Anda untuk menerima instruksi pemulihan kata sandi.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
+                              height: 1.6,
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 48),
+                          
+                          // Input Field with Label Above
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 4, bottom: 8),
+                              child: Text(
+                                'Email',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                            decoration: InputDecoration(
+                              hintText: 'nama@email.com',
+                              hintStyle: TextStyle(color: Colors.grey.withOpacity(0.5), fontSize: 15),
+                              prefixIcon: const Icon(Icons.alternate_email_rounded, color: Color(0xFF8100D1), size: 20),
+                              filled: true,
+                              fillColor: isDark ? Colors.white.withOpacity(0.05) : Colors.white,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.1) : Colors.transparent),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Color(0xFF8100D1), width: 2),
+                              ),
+                              errorBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) return 'Email wajib diisi';
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                                return 'Format email tidak valid';
+                              }
+                              return null;
+                            },
+                          ),
+                          
+                          const SizedBox(height: 32),
+                          
+                          // Luxury Action Button
+                          SizedBox(
+                            width: double.infinity,
+                            height: 60,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _resetPassword,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF8100D1),
+                                foregroundColor: Colors.white,
+                                elevation: 8,
+                                shadowColor: const Color(0xFF8100D1).withOpacity(0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const SizedBox(
+                                      height: 24,
+                                      width: 24,
+                                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                    )
+                                  : const Text(
+                                      'Reset Password',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                                    ),
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 40),
+                          
+                          // Back link
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Ingat kata sandi? ',
+                                    style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[600], fontSize: 14),
+                                  ),
+                                  const TextSpan(
+                                    text: 'Kembali ke Login',
+                                    style: TextStyle(
+                                      color: Color(0xFF8100D1),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 40),
-                
-                // Back to login link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Ingat password?',
-                      style: TextStyle(
-                        color: isDark ? Colors.grey[500] : Colors.grey[600],
-                        fontSize: 15,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                      ),
-                      child: const Text(
-                        'Login Sekarang',
-                        style: TextStyle(
-                          color: Color(0xFF8100D1),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
               ],
             ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackgroundCircle(Color color, double size) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
       ),
     );
   }
