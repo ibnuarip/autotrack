@@ -125,20 +125,121 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
     }
   }
 
-  Widget _buildShadowContainer(Widget child) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 12, top: 8),
+      child: Row(
+        children: [
+          Icon(icon, size: 22, color: const Color(0xFF8100D1)),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2D3436),
+              letterSpacing: -0.2,
+            ),
           ),
         ],
       ),
-      child: child,
+    );
+  }
+
+  Widget _buildCard(List<Widget> children) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
+      ),
+    );
+  }
+
+  Widget _buildTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 12),
+          child: Text(
+            'Pilih Jenis Kendaraan',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF636E72),
+            ),
+          ),
+        ),
+        Row(
+          children: [
+            _buildTypeCard('Motor', Icons.motorcycle_rounded),
+            const SizedBox(width: 12),
+            _buildTypeCard('Mobil', Icons.directions_car_rounded),
+            const SizedBox(width: 12),
+            _buildTypeCard('Roda Tiga', Icons.electric_rickshaw_rounded),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTypeCard(String type, IconData icon) {
+    bool isSelected = _selectedType == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedType = type),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF8100D1) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF8100D1) : Colors.grey[200]!,
+              width: 1.5,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF8100D1).withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : [],
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? Colors.white : Colors.grey[600],
+                size: 22,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                type,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -177,175 +278,138 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[50], // Modern off-white background
+      backgroundColor: const Color(0xFFF8F9FE),
       appBar: AppBar(
         title: Text(
-          _isEditing ? 'Edit Kendaraan' : 'Tambah Kendaraan',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          _isEditing ? 'Edit Kendaraan' : 'Tambah Kendaraan Baru',
+          style: const TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.5),
         ),
         centerTitle: true,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
-            ),
-          ),
-        ),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        foregroundColor: const Color(0xFF2D3436),
       ),
       body: _isLoading 
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF8100D1)))
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+              physics: const BouncingScrollPhysics(),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _buildShadowContainer(
-                      DropdownButtonFormField<String>(
-                        value: _selectedType,
-                        decoration: _getInputDecoration('Jenis Kendaraan', Icons.category),
-                        items: const [
-                          DropdownMenuItem(value: 'Motor', child: Text('Motor')),
-                          DropdownMenuItem(value: 'Mobil', child: Text('Mobil')),
-                          DropdownMenuItem(value: 'Roda Tiga', child: Text('Roda Tiga')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedType = value);
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Pilih jenis kendaraan';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildShadowContainer(
+                    // --- SECTION 1: IDENTITAS ---
+                    _buildSectionHeader('Identitas Kendaraan', Icons.badge_rounded),
+                    _buildCard([
+                      _buildTypeSelector(),
+                      const SizedBox(height: 24),
                       TextFormField(
                         controller: _nameController,
-                        decoration: _getInputDecoration('Nama Kendaraan', Icons.directions_car, '(Contoh: Beat)'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Nama kendaraan wajib diisi';
-                          }
-                          return null;
-                        },
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        decoration: _getInputDecoration('Nama Kendaraan', Icons.edit_rounded, 'Contoh: Honda Beat FI'),
+                        validator: (value) => (value == null || value.isEmpty) ? 'Nama kendaraan wajib diisi' : null,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildShadowContainer(
+                      const SizedBox(height: 20),
                       DropdownButtonFormField<String>(
                         value: _selectedBrand,
-                        decoration: _getInputDecoration('Merek / Brand', Icons.branding_watermark),
+                        isExpanded: true,
+                        decoration: _getInputDecoration('Merek / Brand', Icons.branding_watermark_rounded),
                         items: _brands.map((brand) {
                           return DropdownMenuItem(value: brand, child: Text(brand));
                         }).toList(),
                         onChanged: (value) {
-                          if (value != null) {
-                            setState(() => _selectedBrand = value);
-                          }
+                          if (value != null) setState(() => _selectedBrand = value);
                         },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Pilih merek kendaraan';
-                          }
-                          return null;
-                        },
+                        validator: (value) => (value == null || value.isEmpty) ? 'Pilih merek kendaraan' : null,
                       ),
-                    ),
-                    if (_selectedBrand == 'Lainnya') ...[
-                      const SizedBox(height: 20),
-                      _buildShadowContainer(
+                      if (_selectedBrand == 'Lainnya') ...[
+                        const SizedBox(height: 20),
                         TextFormField(
                           controller: _customBrandController,
-                          decoration: _getInputDecoration('Tulis Merek Anda', Icons.edit_note, '(Contoh: Vespa / Tesla)'),
+                          decoration: _getInputDecoration('Tulis Merek Anda', Icons.edit_note_rounded, 'Contoh: Vespa / Tesla'),
                           textCapitalization: TextCapitalization.words,
                           validator: (value) {
                             if (_selectedBrand == 'Lainnya' && (value == null || value.trim().isEmpty)) {
-                              return 'Merek wajib diisi jika memilih Lainnya';
+                              return 'Merek wajib diisi';
                             }
                             return null;
                           },
                         ),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    _buildShadowContainer(
+                      ],
+                    ]),
+
+                    const SizedBox(height: 24),
+
+                    // --- SECTION 2: ADMNISTRASI ---
+                    _buildSectionHeader('Data Registrasi', Icons.assignment_rounded),
+                    _buildCard([
                       TextFormField(
                         controller: _plateController,
-                        decoration: _getInputDecoration('Nomor Polisi', Icons.pin, 'B 1234 ABC'),
+                        decoration: _getInputDecoration('Nomor Polisi', Icons.pin_rounded, 'B 1234 ABC'),
                         textCapitalization: TextCapitalization.characters,
+                        style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
                         inputFormatters: [
                           TextInputFormatter.withFunction((oldValue, newValue) {
                             return newValue.copyWith(text: newValue.text.toUpperCase());
                           }),
                         ],
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Nomor polisi wajib diisi';
-                          }
-                          if (value.length < 5) {
-                            return 'Nomor polisi minimal 5 karakter';
-                          }
+                          if (value == null || value.isEmpty) return 'Nomor polisi wajib diisi';
+                          if (value.length < 5) return 'Nomor polisi minimal 5 karakter';
                           return null;
                         },
                       ),
-                    ),
-                    const SizedBox(height: 40),
+                    ]),
+
+                    const SizedBox(height: 48),
+
+                    // --- TOMBOL SIMPAN ---
                     Container(
+                      height: 60,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: const Color(0xFF8100D1).withOpacity(0.3),
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: _saveVehicle,
+                        onPressed: _isLoading ? null : _saveVehicle,
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.zero,
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                         ),
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+                              colors: [Color(0xFF8100D1), Color(0xFF6C63FF)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(20),
                           ),
                           child: Container(
                             alignment: Alignment.center,
-                            constraints: const BoxConstraints(minHeight: 56),
                             child: Text(
-                              _isEditing ? 'Simpan Perubahan' : 'Simpan Kendaraan',
+                              _isEditing ? 'SIMPAN PERUBAHAN' : 'TAMBAHKAN KENDARAAN',
                               style: const TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w900,
                                 color: Colors.white,
+                                letterSpacing: 1,
                               ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
