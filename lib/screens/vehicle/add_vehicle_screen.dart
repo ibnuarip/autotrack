@@ -388,7 +388,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF8100D1), Color(0xFF6C63FF)],
+                              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),

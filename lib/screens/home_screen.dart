@@ -159,6 +159,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             setState(() => _isFabExpanded = !_isFabExpanded);
           },
           backgroundColor: const Color(0xFF8100D1),
+          // Gradient FAB is tricky, but let's stick to the primary for now
+          // or use a decoration if needed.
           foregroundColor: Colors.white,
           child: AnimatedRotation(
             duration: const Duration(milliseconds: 300),
@@ -229,7 +231,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
             ),
           ),
           child: Stack(

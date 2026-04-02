@@ -14,10 +14,23 @@ class VehicleListScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Daftar Kendaraan'),
-        backgroundColor: const Color(0xFF8100D1),
+        title: const Text(
+          'Daftar Kendaraan',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+            ),
+          ),
+        ),
       ),
       body: currentUser == null
           ? const Center(child: Text('Silakan login terlebih dahulu'))

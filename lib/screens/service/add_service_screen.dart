@@ -305,7 +305,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF8100D1), Color(0xFF4B0082)],
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
             ),
           ),
         ),
@@ -520,7 +520,7 @@ class _AddServiceScreenState extends State<AddServiceScreen> {
                         child: Ink(
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF8100D1), Color(0xFF6C63FF)],
+                              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             ),

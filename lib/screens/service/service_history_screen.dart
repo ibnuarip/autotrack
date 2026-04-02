@@ -42,10 +42,23 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Riwayat Servis'),
+        title: const Text(
+          'Riwayat Servis',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: const Color(0xFF8100D1),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+            ),
+          ),
+        ),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: query.snapshots(),
