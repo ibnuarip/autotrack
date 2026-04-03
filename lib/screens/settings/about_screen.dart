@@ -6,288 +6,244 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFD),
-      body: CustomScrollView(
-        slivers: [
-          // PREMIUM HEADER
-          SliverAppBar(
-            expandedHeight: 180.0,
-            floating: false,
-            pinned: true,
-            elevation: 0,
-            backgroundColor: const Color(0xFF8100D1),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 20),
-              onPressed: () => Navigator.pop(context),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(height: 40),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10),
-                            ),
-                          ],
-                        ),
-                        child: Image.asset(
-                          'assets/images/autotrack-logo.png',
-                          width: 40,
-                          height: 40,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        'AutoTrack',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      Text(
-                        'Versi 1.0.0',
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+      backgroundColor: const Color(0xFFF2F2F7), // Standard list background color
+      appBar: AppBar(
+        title: const Text(
+          'Tentang AutoTrack',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
           ),
-
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ABOUT SECTION (Original Content)
-                  _buildSectionTitle('Tentang AutoTrack'),
-                  const SizedBox(height: 16),
-                  _buildContentCard(
-                    child: Column(
-                      children: [
-                        _buildParagraph(
-                          'AutoTrack adalah solusi cerdas untuk memantau kesehatan kendaraan Anda secara real-time. Kami percaya bahwa perawatan yang terjadwal bukan hanya soal kenyamanan, tetapi juga kunci utama keselamatan Anda di jalan raya.',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildParagraph(
-                          'Dengan fitur pencatatan servis yang detail, Anda dapat memantau pengeluaran perawatan berkala dan mendapatkan estimasi waktu servis berikutnya. Ini membantu Anda menghindari biaya perbaikan yang tak terduga akibat kerusakan berat.',
-                        ),
-                        const SizedBox(height: 12),
-                        _buildParagraph(
-                          'Antarmuka yang premium dan intuitif memastikan setiap pengguna dapat mengelola riwayat kendaraan mereka dengan mudah, memberikan ketenangan pikiran dalam setiap perjalanan.',
-                        ),
-                      ],
-                    ),
+        ),
+        centerTitle: true,
+        backgroundColor: const Color(0xFFF2F2F7), // Match background for seamless look
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+      ),
+      body: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          const SizedBox(height: 36),
+          // HEADER: Logo & App Info
+          Center(
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.white, // Latar belakang putih bersih
+                borderRadius: BorderRadius.circular(18), // Sudut melengkung halus membulat
+                border: Border.all(
+                  color: Colors.black.withOpacity(0.04), // Border super tipis
+                  width: 1,
+                ),
+                boxShadow: [ // Bayangan natural iOS
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 14,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 6),
                   ),
-                  const SizedBox(height: 32),
-
-                  // FEATURES SECTION
-                  _buildSectionTitle('Fitur Unggulan'),
-                  const SizedBox(height: 16),
-                  _buildFeatureItem(
-                    Icons.history_edu_rounded,
-                    'Pencatatan Servis',
-                    'Simpan riwayat lengkap setiap kali kendaraan Anda masuk bengkel.',
-                  ),
-                  _buildFeatureItem(
-                    Icons.notifications_active_rounded,
-                    'Pengingat Pintar',
-                    'Notifikasi otomatis agar Anda tidak pernah melewatkan jadwal service.',
-                  ),
-                  _buildFeatureItem(
-                    Icons.analytics_rounded,
-                    'Analisis Biaya',
-                    'Pantau pengeluaran perawatan kendaraan Anda secara mendetail.',
-                  ),
-                  const SizedBox(height: 32),
-
-                  // DEVELOPER INFO
-                  _buildSectionTitle('Informasi Aplikasi'),
-                  const SizedBox(height: 16),
-                  _buildContentCard(
-                    child: Column(
-                      children: [
-                        _buildInfoRow('Developer', 'Alghifari', Icons.person_outline_rounded),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1),
-                        ),
-                        _buildInfoRow('Email', 'alghifari@autotrack.app', Icons.mail_outline_rounded),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 12),
-                          child: Divider(height: 1),
-                        ),
-                        _buildInfoRow('Tahun Rilis', '2026', Icons.calendar_today_rounded),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // FOOTER
-                  Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          '© 2026 AutoTrack Teams',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        const Text(
-                          'Made with ❤️ for car enthusiasts',
-                          style: TextStyle(
-                            color: Color(0xFFB500B2),
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 32),
                 ],
               ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(17),
+                child: Image.asset(
+                  'assets/images/autotrack-logo.png',
+                  fit: BoxFit.cover, 
+                  errorBuilder: (context, error, stackTrace) => const Center(
+                    child: Icon(Icons.directions_car, size: 36, color: Colors.grey),
+                  ),
+                ),
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF2D3142),
-      ),
-    );
-  }
-
-  Widget _buildParagraph(String text) {
-    return Text(
-      text,
-      textAlign: TextAlign.justify,
-      style: TextStyle(
-        fontSize: 14,
-        color: Colors.grey[700],
-        height: 1.6,
-      ),
-    );
-  }
-
-  Widget _buildContentCard({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
+          const SizedBox(height: 16),
+          const Center(
+            child: Text(
+              'AutoTrack',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+                letterSpacing: -0.3,
+              ),
+            ),
           ),
+          const SizedBox(height: 4),
+          const Center(
+            child: Text(
+              'Versi 1.0.0 (Build 12)',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+          const SizedBox(height: 36),
+
+          // GROUP 1: Feedback & Community
+          _buildGroup(
+            children: [
+              _buildListTile(
+                icon: Icons.star_border_rounded,
+                iconColor: Colors.orange,
+                title: 'Beri Nilai AutoTrack',
+                onTap: () {
+                  // Navigate to App Store / Play Store (placeholder)
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.mail_outline_rounded,
+                iconColor: Colors.blue,
+                title: 'Kirim Masukan',
+                onTap: () {
+                  // Open Email client (placeholder)
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.bug_report_outlined,
+                iconColor: Colors.red,
+                title: 'Laporkan Masalah',
+                onTap: () {
+                  // Open Issue Report tracker (placeholder)
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          // GROUP 2: Info & Legal
+          _buildGroup(
+            children: [
+               _buildListTile(
+                icon: Icons.public,
+                iconColor: Colors.green,
+                title: 'Kunjungi Website',
+                onTap: () {
+                  // Open Website (placeholder)
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.description_outlined,
+                iconColor: Colors.grey[700]!,
+                title: 'Syarat & Ketentuan',
+                onTap: () {
+                  // Open Terms (placeholder)
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.privacy_tip_outlined,
+                iconColor: Colors.grey[700]!,
+                title: 'Kebijakan Privasi',
+                onTap: () {
+                  // Open Privacy Policies (placeholder)
+                },
+              ),
+              _buildDivider(),
+              _buildListTile(
+                icon: Icons.info_outline_rounded,
+                iconColor: Colors.grey[700]!,
+                title: 'Lisensi Open Source',
+                onTap: () {
+                  showLicensePage(
+                    context: context,
+                    applicationName: 'AutoTrack',
+                    applicationVersion: '1.0.0',
+                    applicationLegalese: 'Hak Cipta © 2026\nAutoTrack Teams',
+                  );
+                },
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 48),
+
+          // FOOTER: Copyright
+          const Center(
+            child: Text(
+              'AutoTrack Teams',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.black45,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Center(
+            child: Text(
+              'Hak Cipta © 2026 Dilindungi Undang-Undang',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black38,
+              ),
+            ),
+          ),
+          const SizedBox(height: 40),
         ],
       ),
-      child: child,
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title, String desc) {
+  Widget _buildGroup({required List<Widget> children}) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFF8100D1).withOpacity(0.08),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: const Color(0xFF8100D1), size: 22),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListTile({
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10), // Matches group radius if it's top/bot child
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, color: iconColor, size: 24),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
                   title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15,
-                    color: Color(0xFF2D3142),
+                    fontSize: 16,
+                    color: Colors.black87,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  desc,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 13,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[400]),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
-        ),
-        const Spacer(),
-        Text(
-          value,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3142),
-            fontSize: 14,
-          ),
-        ),
-      ],
+  Widget _buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.only(left: 56),
+      child: Divider(height: 1, thickness: 0.5, color: Color(0xFFE5E5EA)),
     );
   }
 }

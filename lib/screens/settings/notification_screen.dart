@@ -83,7 +83,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                   ),
                   child: SwitchListTile(
                     title: const Text(
-                      'Aktifkan Pengingat Servis',
+                      'Aktifkan Pengingat',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: const Text(
