@@ -5,6 +5,7 @@ import '../../services/auth_service.dart';
 import 'service/add_service_screen.dart';
 import 'vehicle/add_vehicle_screen.dart';
 import 'settings/profile_screen.dart';
+import 'home/notification_center_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -97,10 +98,45 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       backgroundColor: const Color(0xFF8100D1),
       elevation: 0,
       actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
-          onPressed: () {
-            // TODO: Navigate to notification center
+        StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('services')
+              .where('userId', isEqualTo: _currentUser!.uid)
+              .where('nextServiceDate', isGreaterThanOrEqualTo: Timestamp.now())
+              .where('nextServiceDate', isLessThanOrEqualTo: Timestamp.fromDate(DateTime.now().add(const Duration(days: 2))))
+              .snapshots(),
+          builder: (context, snapshot) {
+            bool hasUpcoming = false;
+            if (snapshot.hasData) {
+              // Check for at least one unread notification
+              hasUpcoming = snapshot.data!.docs.any((doc) => (doc.data() as Map<String, dynamic>)['isNotificationRead'] != true);
+            }
+            return Stack(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotificationCenterScreen()),
+                    );
+                  },
+                ),
+                if (hasUpcoming)
+                  Positioned(
+                    right: 12,
+                    top: 12,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(minWidth: 8, minHeight: 8),
+                    ),
+                  ),
+              ],
+            );
           },
         ),
         IconButton(
