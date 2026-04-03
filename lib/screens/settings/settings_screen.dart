@@ -150,8 +150,48 @@ class SettingsScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextButton.icon(
-                onPressed: () async {
-                  await authService.signOut();
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text(
+                          'Keluar Akun',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        content: const Text(
+                          'Apakah anda yakin mau keluar dari akun ini?',
+                          style: TextStyle(fontSize: 15),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text(
+                              'Batal',
+                              style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              await authService.signOut();
+                            },
+                            child: const Text('Ya, Lanjutkan'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 icon: const Icon(Icons.logout_rounded, color: Colors.red),
                 label: const Text(
