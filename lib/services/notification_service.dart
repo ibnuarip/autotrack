@@ -1,7 +1,9 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' as fln;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
-import 'package:flutter/foundation.dart'; // Added for kIsWeb
+import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -51,6 +53,10 @@ class NotificationService {
     // Ensure ID is within 32-bit range for Android
     final int safeId = id.abs() % 1000000000;
     
+    // Get current user's name for more personalized notification
+    final String? userName = FirebaseAuth.instance.currentUser?.displayName;
+    final String greeting = userName != null ? 'Halo $userName! ' : 'Halo! ';
+
     // Schedule H-2 Reminder (2 days before)
     final h2Date = nextServiceDate.subtract(const Duration(days: 2));
     final nowTz = tz.TZDateTime.now(tz.local);
@@ -64,7 +70,7 @@ class NotificationService {
       await _notificationsPlugin.zonedSchedule(
         id: safeId * 2,
         title: 'Pengingat Servis H-2',
-        body: 'Halo! Kendaraan $vehicleName Anda ada jadwal servis 2 hari lagi nih. Jangan lupa ya!',
+        body: '${greeting}Kendaraan $vehicleName Anda ada jadwal servis 2 hari lagi nih. Jangan lupa ya!',
         scheduledDate: scheduledH2,
         notificationDetails: _notificationDetails(),
         androidScheduleMode: fln.AndroidScheduleMode.inexactAllowWhileIdle,
@@ -81,7 +87,7 @@ class NotificationService {
       await _notificationsPlugin.zonedSchedule(
         id: (safeId * 2) + 1,
         title: 'Waktunya Servis Hari Ini!',
-        body: 'Hari ini saatnya servis untuk $vehicleName. Yuk, ke bengkel sekarang agar performa tetap prima!',
+        body: '${greeting}Hari ini saatnya servis untuk $vehicleName. Yuk, ke bengkel sekarang agar performa tetap prima!',
         scheduledDate: scheduledH0,
         notificationDetails: _notificationDetails(),
         androidScheduleMode: fln.AndroidScheduleMode.inexactAllowWhileIdle,
@@ -104,5 +110,65 @@ class NotificationService {
 
   Future<void> cancelAllNotifications() async {
     await _notificationsPlugin.cancelAll();
+  }
+
+  Future<void> cancelServiceReminder(int id) async {
+    final int safeId = id.abs() % 1000000000;
+    await _notificationsPlugin.cancel(id: safeId * 2);
+    await _notificationsPlugin.cancel(id: (safeId * 2) + 1);
+  }
+
+  /// Reschedule notifications for a specific user from Firestore
+  Future<void> rescheduleUserNotifications(String? userId) async {
+    if (userId == null) return;
+
+    try {
+      // 1. Cancel all first to ensure no duplicates or old data
+      await cancelAllNotifications();
+
+      // 2. Fetch upcoming services for this user
+      final now = DateTime.now();
+      final snapshots = await FirebaseFirestore.instance
+          .collection('services')
+          .where('userId', isEqualTo: userId)
+          .where('nextServiceDate', isGreaterThan: Timestamp.fromDate(now))
+          .get();
+
+      for (var doc in snapshots.docs) {
+        final data = doc.data();
+        final String docId = doc.id;
+        final String? vehicleId = data['vehicleId'];
+        final Timestamp? nextServiceTimestamp = data['nextServiceDate'];
+        final String? reminderTimeStr = data['reminderTime'];
+
+        if (nextServiceTimestamp != null && vehicleId != null) {
+          int hour = 8;
+          int minute = 0;
+
+          if (reminderTimeStr != null) {
+            final parts = reminderTimeStr.split(':');
+            if (parts.length == 2) {
+              hour = int.tryParse(parts[0]) ?? 8;
+              minute = int.tryParse(parts[1]) ?? 0;
+            }
+          }
+
+          // Fetch vehicle name
+          final vehicleDoc = await FirebaseFirestore.instance.collection('vehicles').doc(vehicleId).get();
+          final vehicleName = vehicleDoc.exists ? (vehicleDoc.data()?['name'] ?? 'Kendaraan') : 'Kendaraan';
+
+          await scheduleServiceReminder(
+            id: docId.hashCode,
+            vehicleName: vehicleName,
+            nextServiceDate: nextServiceTimestamp.toDate(),
+            hour: hour,
+            minute: minute,
+          );
+        }
+      }
+      debugPrint('Successfully rescheduled ${snapshots.docs.length} notifications for user $userId');
+    } catch (e) {
+      debugPrint('Error rescheduling notifications: $e');
+    }
   }
 }

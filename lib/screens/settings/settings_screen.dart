@@ -36,6 +36,7 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 120),
         child: Column(
           children: [
             // PROFILE MINI CARD

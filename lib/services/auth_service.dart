@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../utils/custom_toast.dart';
+import 'notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -15,6 +16,9 @@ class AuthService {
       
       // Mengirimkan notifikasi login sukses secara real-time melalui ValueNotifier
       CustomToast.notifyLoginSuccess('Selamat datang kembali di AutoTrack!');
+      
+      // Reschedule notifications for the logged in user
+      await NotificationService().rescheduleUserNotifications(result.user?.uid);
       
       return result.user;
     } catch (e) {
@@ -50,6 +54,9 @@ class AuthService {
       // Ensure user document exists in Firestore
       if (result.user != null) {
         await _createUserDocument(result.user!, result.user!.displayName ?? '');
+        
+        // Reschedule notifications for the logged in user
+        await NotificationService().rescheduleUserNotifications(result.user?.uid);
       }
       
       return result.user;
@@ -80,6 +87,7 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
+      await NotificationService().cancelAllNotifications();
       return await _auth.signOut();
     } catch (e) {
       rethrow;

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
+import '../../services/notification_service.dart';
 import 'add_service_screen.dart';
 
 class ServiceHistoryScreen extends StatefulWidget {
@@ -189,7 +189,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
           final serviceDocs = snapshot.data!.docs;
 
           return ListView.builder(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
             itemCount: serviceDocs.length,
             itemBuilder: (context, index) {
               final doc = serviceDocs[index];
@@ -404,6 +404,9 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
             onPressed: () async {
               Navigator.pop(context);
               try {
+                // Cancel notification first
+                await NotificationService().cancelServiceReminder(serviceId.hashCode);
+                
                 await _firestore.collection('services').doc(serviceId).delete();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(

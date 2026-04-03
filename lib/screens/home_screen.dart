@@ -19,8 +19,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late AnimationController _animationController;
   late Animation<double> _fadeInAnimation;
   
-  // For Expandable FAB
-  bool _isFabExpanded = false;
+  // User? get _currentUser => _authService.currentUser;
 
   User? get _currentUser => _authService.currentUser;
 
@@ -74,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         _buildSectionHeader('Servis Selanjutnya'),
                         const SizedBox(height: 12),
                         _buildUpcomingServicesSection(),
-                        const SizedBox(height: 100), // Space for FAB
+                        const SizedBox(height: 120), // Extra space to prevent overlap with floating navigation bar
                       ],
                     ),
                   ),
@@ -82,124 +81,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ],
           ),
-          if (_isFabExpanded)
-            GestureDetector(
-              onTap: () => setState(() => _isFabExpanded = false),
-              child: Container(
-                color: Colors.black.withOpacity(0.5),
-                width: double.infinity,
-                height: double.infinity,
-              ),
-            ),
+           // Floating Add menu is handled by MainNavigation
         ],
       ),
-      floatingActionButton: _buildExpandableFab(),
     );
   }
 
-  Widget _buildExpandableFab() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        if (_isFabExpanded) ...[
-          _buildFabOption(
-            icon: Icons.directions_car_filled_rounded,
-            label: 'Tambah Kendaraan',
-            onPressed: () {
-              setState(() => _isFabExpanded = false);
-              _navigateTo(const AddVehicleScreen());
-            },
-          ),
-          const SizedBox(height: 12),
-          _buildFabOption(
-            icon: Icons.build_circle_rounded,
-            label: 'Tambah Servis',
-            onPressed: () async {
-              setState(() => _isFabExpanded = false);
-              
-              // Cek apakah user sudah punya kendaraan
-              final vehicleSnapshot = await _firestore
-                  .collection('vehicles')
-                  .where('userId', isEqualTo: _currentUser!.uid)
-                  .get();
 
-              if (vehicleSnapshot.docs.isEmpty) {
-                if (mounted) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('Belum Ada Kendaraan'),
-                      content: const Text('Anda belum memiliki kendaraan. Silakan tambah kendaraan terlebih dahulu.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Batal'),
-                        ),
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _navigateTo(const AddVehicleScreen());
-                          },
-                          child: const Text('Tambah Kendaraan'),
-                        ),
-                      ],
-                    ),
-                  );
-                }
-              } else {
-                _navigateTo(const AddServiceScreen());
-              }
-            },
-          ),
-          const SizedBox(height: 12),
-        ],
-        FloatingActionButton(
-          onPressed: () {
-            setState(() => _isFabExpanded = !_isFabExpanded);
-          },
-          backgroundColor: const Color(0xFF8100D1),
-          // Gradient FAB is tricky, but let's stick to the primary for now
-          // or use a decoration if needed.
-          foregroundColor: Colors.white,
-          child: AnimatedRotation(
-            duration: const Duration(milliseconds: 300),
-            turns: _isFabExpanded ? 0.125 : 0,
-            child: const Icon(Icons.add, size: 28),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFabOption({required IconData icon, required String label, required VoidCallback onPressed}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(8),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 4),
-            ],
-          ),
-          child: Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-        ),
-        const SizedBox(width: 12),
-        FloatingActionButton.small(
-          onPressed: onPressed,
-          backgroundColor: Colors.white,
-          foregroundColor: const Color(0xFF8100D1),
-          child: Icon(icon),
-        ),
-      ],
-    );
-  }
 
   Widget _buildSliverAppBar() {
     return SliverAppBar(
