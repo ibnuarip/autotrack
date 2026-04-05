@@ -11,11 +11,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   
-  // Initialize notification service
-  final notificationService = NotificationService();
-  await notificationService.init();
-  
   runApp(const MyApp());
+
+  // Initialize notification service in background to avoid blocking startup
+  NotificationService().init();
 }
 
 class MyApp extends StatefulWidget {
@@ -97,12 +96,9 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthService authService = AuthService();
-
     return StreamBuilder<User?>(
-      stream: authService.user,
+      stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // If the snapshot has data, the user is logged in
         if (snapshot.connectionState == ConnectionState.active) {
           User? user = snapshot.data;
           if (user == null) {

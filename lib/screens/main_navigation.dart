@@ -273,7 +273,7 @@ class _MainNavigationState extends State<MainNavigation> {
             ),
             child: Row(
               children: [
-                Expanded(child: _buildNavItem(0, Icons.grid_view_rounded, 'Home')),
+                Expanded(child: _buildNavItem(0, Icons.home_rounded, 'Home')),
                 Expanded(child: _buildNavItem(1, Icons.minor_crash_rounded, 'Kendaraan')),
                 const SizedBox(width: 56), // Fixed gap for central FAB (prevents crowding)
                 Expanded(child: _buildNavItem(2, Icons.receipt_long_rounded, 'Riwayat')),
@@ -295,9 +295,8 @@ class _MainNavigationState extends State<MainNavigation> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutQuint,
         padding: const EdgeInsets.symmetric(vertical: 2), // Tighter padding to prevent overflow
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF8100D1).withOpacity(0.08) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+        decoration: const BoxDecoration(
+          color: Colors.transparent,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center, // Center contents vertically
@@ -305,7 +304,7 @@ class _MainNavigationState extends State<MainNavigation> {
             Icon(
               icon,
               color: isSelected ? const Color(0xFF8100D1) : Colors.grey[400],
-              size: isSelected ? 24 : 22, // Slightly smaller icons
+              size: isSelected ? 26 : 22, // Size adjusted for selection pop
             ),
             const SizedBox(height: 2),
             Text(

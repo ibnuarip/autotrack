@@ -112,7 +112,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             Stack(
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.3,
+                  height: MediaQuery.of(context).size.height * 0.35,
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
@@ -179,14 +179,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             // FORM SECTION
             Transform.translate(
-              offset: const Offset(0, -30),
+              offset: const Offset(0, -20),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Container(
-                  padding: const EdgeInsets.all(32),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -203,12 +203,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const Text(
                           'Registrasi',
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Color(0xFF2D2D2D),
                           ),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 18),
                         
                         // Name field
                         TextFormField(
@@ -265,11 +265,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF8100D1),
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            elevation: 8,
-                            shadowColor: const Color(0xFF8100D1).withOpacity(0.4),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            elevation: 4,
+                            shadowColor: const Color(0xFF8100D1).withOpacity(0.3),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: _isLoading
@@ -280,7 +280,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 )
                               : const Text(
                                   'Daftar Sekarang',
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                                 ),
                         ),
                         const SizedBox(height: 24),
@@ -301,25 +301,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         OutlinedButton(
                           onPressed: _isLoading ? null : _loginWithGoogle,
                           style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
                             side: BorderSide(color: Colors.grey.withOpacity(0.2)),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset('assets/images/google-logo.png', height: 20),
+                              Image.asset('assets/images/google-logo.png', height: 18),
                               const SizedBox(width: 12),
                               const Text(
                                 'Google Account',
-                                style: TextStyle(color: Color(0xFF2D2D2D), fontWeight: FontWeight.w600),
+                                style: TextStyle(color: Color(0xFF2D2D2D), fontWeight: FontWeight.w600, fontSize: 13),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
 
                         // Go to login
                         Row(
@@ -363,18 +363,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       filled: true,
       fillColor: const Color(0xFFF8F9FA),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: Color(0xFF8100D1), width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
     );
   }
 }
