@@ -27,10 +27,10 @@ class _MainNavigationState extends State<MainNavigation> {
     CustomToast.loginSuccessNotifier.addListener(_handleLoginSuccess);
     
     // Sinkronisasi notifikasi pengingat servis saat aplikasi dibuka dalam kondisi login
-    _syncNotifications();
-    
-    // Cek jika ada notifikasi yang tertunda saat widget pertama kali dibuat
-    WidgetsBinding.instance.addPostFrameCallback((_) => _handleLoginSuccess());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _syncNotifications();
+      _handleLoginSuccess();
+    });
   }
 
   Future<void> _syncNotifications() async {
@@ -58,11 +58,11 @@ class _MainNavigationState extends State<MainNavigation> {
     super.dispose();
   }
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    VehicleListScreen(),
-    ServiceHistoryScreen(),
-    SettingsScreen(),
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const VehicleListScreen(),
+    const ServiceHistoryScreen(),
+    const SettingsScreen(),
   ];
 
   void _onItemTapped(int index) {

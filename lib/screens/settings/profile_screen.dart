@@ -52,9 +52,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profil Saya', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: const Color(0xFF8100D1),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+            ),
+          ),
+        ),
       ),
       body: StreamBuilder<DocumentSnapshot>(
         stream: FirebaseFirestore.instance.collection('users').doc(user!.uid).snapshots(),
@@ -74,7 +83,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 Container(
                   width: double.infinity,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF8100D1),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+                    ),
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(40),
                       bottomRight: Radius.circular(40),
@@ -146,23 +159,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 40),
 
                       // ACTIONS
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditProfileScreen(currentName: name),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.edit_note_rounded),
-                        label: const Text('Perbarui Profil'),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 56),
-                          backgroundColor: const Color(0xFF8100D1),
-                          foregroundColor: Colors.white,
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      Container(
+                        width: double.infinity,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => EditProfileScreen(currentName: name),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.edit_note_rounded),
+                          label: const Text('Perbarui Profil'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.transparent,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),

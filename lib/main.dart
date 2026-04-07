@@ -14,7 +14,7 @@ void main() async {
   runApp(const MyApp());
 
   // Initialize notification service in background to avoid blocking startup
-  NotificationService().init();
+  Future.microtask(() => NotificationService().init());
 }
 
 class MyApp extends StatefulWidget {

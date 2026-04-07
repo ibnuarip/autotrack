@@ -203,22 +203,79 @@ class VehicleListScreen extends StatelessWidget {
 
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.directions_car_outlined, size: 80, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          const Text(
-            'Belum ada kendaraan',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Klik tombol (+) di Home untuk menambah kendaraan.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                color: const Color(0xFF8100D1).withOpacity(0.04),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Container(
+                  height: 75,
+                  width: 75,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF8100D1).withOpacity(0.06),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Container(
+                      height: 54,
+                      width: 54,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF8100D1).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.directions_car_filled_rounded,
+                        size: 24,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Belum Ada Kendaraan',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF2D3436),
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Daftar kendaraan Anda masih kosong. Yuk, tambahkan kendaraan pertama Anda sekarang!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 60), // Push the content slightly upwards
+          ],
+        ),
       ),
     );
   }

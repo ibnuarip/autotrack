@@ -91,8 +91,20 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Keamanan Password'),
+        title: const Text('Keamanan Password', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -172,20 +184,34 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               const SizedBox(height: 40),
 
-              ElevatedButton(
-                onPressed: _isLoading ? null : _changePassword,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                  backgroundColor: const Color(0xFF8100D1),
-                  foregroundColor: Colors.white,
+              Container(
+                width: double.infinity,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: _isLoading
+                      ? null
+                      : const LinearGradient(colors: [Color(0xFF8100D1), Color(0xFFB500B2)]),
+                  color: _isLoading ? Colors.grey[300] : null,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : const Text('Perbarui Password Sekarang'),
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _changePassword,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    foregroundColor: Colors.white,
+                    shadowColor: Colors.transparent,
+                    disabledBackgroundColor: Colors.transparent,
+                    disabledForegroundColor: Colors.grey[600],
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : const Text('Perbarui Password Sekarang'),
+                ),
               ),
             ],
           ),

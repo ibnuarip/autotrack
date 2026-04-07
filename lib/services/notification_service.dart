@@ -134,6 +134,25 @@ class NotificationService {
           .where('nextServiceDate', isGreaterThan: Timestamp.fromDate(now))
           .get();
 
+      if (snapshots.docs.isEmpty) return;
+
+      // Collect unique vehicle IDs to fetch them efficiently
+      final vehicleIds = snapshots.docs
+          .map((doc) => doc.data()['vehicleId'] as String?)
+          .whereType<String>()
+          .toSet();
+
+      // Fetch all required vehicles in parallel
+      final Map<String, String> vehicleNames = {};
+      await Future.wait(vehicleIds.map((vId) async {
+        final vehicleDoc = await FirebaseFirestore.instance.collection('vehicles').doc(vId).get();
+        if (vehicleDoc.exists) {
+          vehicleNames[vId] = (vehicleDoc.data()?['name'] ?? 'Kendaraan') as String;
+        }
+      }));
+
+      // Schedule all reminders concurrently
+      final List<Future<void>> scheduleFutures = [];
       for (var doc in snapshots.docs) {
         final data = doc.data();
         final String docId = doc.id;
@@ -153,19 +172,19 @@ class NotificationService {
             }
           }
 
-          // Fetch vehicle name
-          final vehicleDoc = await FirebaseFirestore.instance.collection('vehicles').doc(vehicleId).get();
-          final vehicleName = vehicleDoc.exists ? (vehicleDoc.data()?['name'] ?? 'Kendaraan') : 'Kendaraan';
+          final vehicleName = vehicleNames[vehicleId] ?? 'Kendaraan';
 
-          await scheduleServiceReminder(
+          scheduleFutures.add(scheduleServiceReminder(
             id: docId.hashCode,
             vehicleName: vehicleName,
             nextServiceDate: nextServiceTimestamp.toDate(),
             hour: hour,
             minute: minute,
-          );
+          ));
         }
       }
+      
+      await Future.wait(scheduleFutures);
       debugPrint('Successfully rescheduled ${snapshots.docs.length} notifications for user $userId');
     } catch (e) {
       debugPrint('Error rescheduling notifications: $e');

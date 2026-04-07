@@ -116,42 +116,42 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      height: 120,
-                      width: 120,
+                      height: 100,
+                      width: 100,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8100D1).withOpacity(0.03),
+                        color: const Color(0xFF8100D1).withOpacity(0.04),
                         shape: BoxShape.circle,
                       ),
                       child: Center(
                         child: Container(
-                          height: 90,
-                          width: 90,
+                          height: 75,
+                          width: 75,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF8100D1).withOpacity(0.05),
+                            color: const Color(0xFF8100D1).withOpacity(0.06),
                             shape: BoxShape.circle,
                           ),
                           child: Center(
                             child: Container(
-                              height: 70,
-                              width: 70,
+                              height: 54,
+                              width: 54,
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
-                                  colors: [Color(0xFF8100D1), Color(0xFF6C63FF)],
+                                  colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 ),
-                                borderRadius: BorderRadius.circular(22),
+                                shape: BoxShape.circle, // Diubah menjadi bulat agar rapi
                                 boxShadow: [
                                   BoxShadow(
                                     color: const Color(0xFF8100D1).withOpacity(0.3),
-                                    blurRadius: 15,
-                                    offset: const Offset(0, 8),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 6),
                                   ),
                                 ],
                               ),
                               child: const Icon(
                                 Icons.history_edu_rounded,
-                                size: 32,
+                                size: 24, // Diperkecil dari 32
                                 color: Colors.white,
                               ),
                             ),
@@ -180,6 +180,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
                         height: 1.5,
                       ),
                     ),
+                    const SizedBox(height: 60), // Nudge the content upwards
                   ],
                 ),
               ),
