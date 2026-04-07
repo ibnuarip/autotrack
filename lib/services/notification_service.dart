@@ -1,7 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart' as fln;
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -104,6 +104,8 @@ class NotificationService {
         importance: fln.Importance.max,
         priority: fln.Priority.high,
         ticker: 'ticker',
+        largeIcon: fln.DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
+        color: Color(0xFF8100D1),
       ),
     );
   }
