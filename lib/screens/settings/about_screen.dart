@@ -24,63 +24,87 @@ class AboutScreen extends StatelessWidget {
       body: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         children: [
-          const SizedBox(height: 36),
-          // HEADER: Logo & App Info
+          const SizedBox(height: 48),
+          // HEADER: Logo & App Info (Premium Redesign)
           Center(
-            child: Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.white, // Latar belakang putih bersih
-                borderRadius: BorderRadius.circular(18), // Sudut melengkung halus membulat
-                border: Border.all(
-                  color: Colors.black.withOpacity(0.04), // Border super tipis
-                  width: 1,
+            child: Column(
+              children: [
+                // Minimalist Logo Presentation
+                Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        const Color(0xFF8100D1).withOpacity(0.05),
+                        const Color(0xFFB500B2).withOpacity(0.05),
+                      ],
+                    ),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Hero(
+                      tag: 'app_logo',
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF8100D1).withOpacity(0.2),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/autotrack-logo.png',
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.directions_car_filled_rounded,
+                              size: 40,
+                              color: Color(0xFF8100D1),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-                boxShadow: [ // Bayangan natural iOS
-                  BoxShadow(
+                const SizedBox(height: 24),
+                const Text(
+                  'AutoTrack',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                    letterSpacing: -1,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
                     color: Colors.black.withOpacity(0.05),
-                    blurRadius: 14,
-                    spreadRadius: 0,
-                    offset: const Offset(0, 6),
+                    borderRadius: BorderRadius.circular(20),
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(17),
-                child: Image.asset(
-                  'assets/images/autotrack-logo.png',
-                  fit: BoxFit.cover, 
-                  errorBuilder: (context, error, stackTrace) => const Center(
-                    child: Icon(Icons.directions_car, size: 36, color: Colors.grey),
+                  child: const Text(
+                    'Versi 1.0.1 • Build 24',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black54,
+                    ),
                   ),
                 ),
-              ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          const Center(
-            child: Text(
-              'AutoTrack',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-                letterSpacing: -0.3,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Center(
-            child: Text(
-              'Versi 1.0.0 (Build 12)',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
-              ),
-            ),
-          ),
-          const SizedBox(height: 36),
+          const SizedBox(height: 48),
 
           // GROUP 1: Feedback & Community
           _buildGroup(
@@ -145,20 +169,6 @@ class AboutScreen extends StatelessWidget {
                   // Open Privacy Policies (placeholder)
                 },
               ),
-              _buildDivider(),
-              _buildListTile(
-                icon: Icons.info_outline_rounded,
-                iconColor: Colors.grey[700]!,
-                title: 'Lisensi Open Source',
-                onTap: () {
-                  showLicensePage(
-                    context: context,
-                    applicationName: 'AutoTrack',
-                    applicationVersion: '1.0.0',
-                    applicationLegalese: 'Hak Cipta © 2026\nAutoTrack Teams',
-                  );
-                },
-              ),
             ],
           ),
 
@@ -197,7 +207,14 @@ class AboutScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: children,
@@ -216,18 +233,26 @@ class AboutScreen extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(10), // Matches group radius if it's top/bot child
+        borderRadius: BorderRadius.circular(20),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Row(
             children: [
-              Icon(icon, color: iconColor, size: 24),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconColor, size: 22),
+              ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                 ),
@@ -242,8 +267,8 @@ class AboutScreen extends StatelessWidget {
 
   Widget _buildDivider() {
     return const Padding(
-      padding: EdgeInsets.only(left: 56),
-      child: Divider(height: 1, thickness: 0.5, color: Color(0xFFE5E5EA)),
+      padding: EdgeInsets.only(left: 68),
+      child: Divider(height: 1, thickness: 0.5, color: Color(0xFFF2F2F7)),
     );
   }
 }

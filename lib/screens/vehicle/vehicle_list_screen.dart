@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'add_vehicle_screen.dart';
+import 'vehicle_detail_screen.dart';
 
 class VehicleListScreen extends StatelessWidget {
   const VehicleListScreen({super.key});
@@ -69,9 +70,22 @@ class VehicleListScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(16),
                         side: BorderSide(color: Colors.grey[200]!),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => VehicleDetailScreen(
+                                vehicleId: docs[index].id,
+                                vehicleData: data,
+                              ),
+                            ),
+                          );
+                        },
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(12),
@@ -148,6 +162,7 @@ class VehicleListScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
                       ),
                     );
                   },
