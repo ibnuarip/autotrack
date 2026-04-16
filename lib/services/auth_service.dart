@@ -6,7 +6,9 @@ import 'notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId: '145686653348-6lqug46lhk96fciamle8a2mi8igpmpoi.apps.googleusercontent.com',
+  );
 
   // Sign with email and password
   Future<User?> signInWithEmailAndPassword(String email, String password) async {

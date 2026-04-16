@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
 import '../../utils/custom_toast.dart';
 import 'register_screen.dart';
@@ -74,10 +75,26 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = false;
       });
+      
+      String errorMessage = e.toString().contains(']') 
+          ? e.toString().split(']').last.trim() 
+          : e.toString();
+          
+      // Handle spesifik error dari PlatformException (Google Sign In)
+      if (e is PlatformException) {
+        if (e.code == '12500') {
+          errorMessage = 'Konfigurasi Google gagal (Error 12500). Berkemungkinan SHA-1 belum terdaftar di Firebase.';
+        } else if (e.code == '10') {
+          errorMessage = 'Developer Error (Error 10). Pastikan SHA-1 Anda sudah benar di Firebase Console.';
+        } else if (e.code == 'network_error') {
+          errorMessage = 'Koneksi internet bermasalah. Silakan periksa jaringan Anda.';
+        }
+      }
+
       CustomToast.showError(
         context,
         title: 'Google Login Gagal',
-        message: e.toString().split(']').last.trim(),
+        message: errorMessage,
       );
     }
   }
