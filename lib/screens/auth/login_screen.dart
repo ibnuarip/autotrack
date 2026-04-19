@@ -102,12 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // Optimasi performa: Pre-cache gambar agar tidak lag saat keyboard muncul/viewport berubah
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      precacheImage(const AssetImage('assets/images/home.png'), context);
-      precacheImage(const AssetImage('assets/images/autotrack-logo.png'), context);
-      precacheImage(const AssetImage('assets/images/google-logo.png'), context);
-    });
+    // Precache gambar dihapus karena dapat memberatkan frame awal jika image terlalu besar
   }
 
   @override
@@ -131,7 +126,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Stack(
                 children: [
                   Container(
-                    height: MediaQuery.of(context).size.height * 0.38,
+                    height: MediaQuery.sizeOf(context).height * 0.38,
                     width: double.infinity,
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -145,14 +140,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         bottomLeft: Radius.circular(40),
                         bottomRight: Radius.circular(40),
                       ),
-                      child: Opacity(
-                        opacity: 0.5,
-                        child: Image.asset(
-                          'assets/images/home.png',
-                          fit: BoxFit.cover,
-                          // Optimasi: Gunakan filterQuality low untuk render lebih cepat saat resize
-                          filterQuality: FilterQuality.low,
-                        ),
+                      child: Image.asset(
+                        'assets/images/home.png',
+                        fit: BoxFit.cover,
+                        color: Colors.white.withOpacity(0.5),
+                        colorBlendMode: BlendMode.modulate,
+                        // Optimasi: Gunakan filterQuality low untuk render lebih cepat saat resize
+                        filterQuality: FilterQuality.low,
                       ),
                     ),
                   ),
@@ -210,23 +204,24 @@ class _LoginScreenState extends State<LoginScreen> {
             // FORM SECTION
             Transform.translate(
               offset: const Offset(0, -20),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 24,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Form(
-                    key: _formKey,
+              child: RepaintBoundary(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Form(
+                      key: _formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -422,6 +417,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+            ),
             ),
             const SizedBox(height: 20),
           ],

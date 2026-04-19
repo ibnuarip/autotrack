@@ -19,8 +19,8 @@ class AuthService {
       // Mengirimkan notifikasi login sukses secara real-time melalui ValueNotifier
       CustomToast.notifyLoginSuccess('Login Berhasil!');
       
-      // Reschedule notifications for the logged in user
-      await NotificationService().rescheduleUserNotifications(result.user?.uid);
+      // Reschedule notifications for the logged in user as fire-and-forget
+      NotificationService().rescheduleUserNotifications(result.user?.uid);
       
       return result.user;
     } catch (e) {
@@ -55,10 +55,11 @@ class AuthService {
       
       // Ensure user document exists in Firestore
       if (result.user != null) {
-        await _createUserDocument(result.user!, result.user!.displayName ?? '');
+        // Fire-and-forget _createUserDocument to speed up login
+        _createUserDocument(result.user!, result.user!.displayName ?? '');
         
         // Reschedule notifications for the logged in user
-        await NotificationService().rescheduleUserNotifications(result.user?.uid);
+        NotificationService().rescheduleUserNotifications(result.user?.uid);
       }
       
       return result.user;
