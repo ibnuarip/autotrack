@@ -34,7 +34,7 @@ class _HelpScreenState extends State<HelpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Bantuan'),
@@ -53,7 +53,7 @@ class _HelpScreenState extends State<HelpScreen> {
               padding: const EdgeInsets.fromLTRB(24, 120, 24, 40),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF8100D1), Color(0xFF6A00AF)],
+                  colors: [Color(0xFF8100D1), Color(0xFFB500B2)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
