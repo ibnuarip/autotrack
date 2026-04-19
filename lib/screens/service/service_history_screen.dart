@@ -190,7 +190,7 @@ class _ServiceHistoryScreenState extends State<ServiceHistoryScreen> {
           final serviceDocs = snapshot.data!.docs;
 
           return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             itemCount: serviceDocs.length,
             itemBuilder: (context, index) {
               final doc = serviceDocs[index];

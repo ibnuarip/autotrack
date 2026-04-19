@@ -75,7 +75,8 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Allow body to flow behind the bottom bar
+      backgroundColor: const Color(0xFFFBFBFD),
+      extendBody: false, // Prevents body from scrolling behind the transparent bottom bar area
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 400),
         switchInCurve: Curves.easeInOutBack,

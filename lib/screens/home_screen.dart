@@ -74,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         _buildSectionHeader('Servis Selanjutnya'),
                         const SizedBox(height: 12),
                         _buildUpcomingServicesSection(),
-                        const SizedBox(height: 120), // Extra space to prevent overlap with floating navigation bar
+                        const SizedBox(height: 24), // Reduced space since extendBody is false
                       ],
                     ),
                   ),

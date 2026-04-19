@@ -51,7 +51,7 @@ class AuthService {
       UserCredential result = await _auth.signInWithCredential(credential);
       
       // Mengirimkan notifikasi login sukses secara real-time melalui ValueNotifier
-      CustomToast.notifyLoginSuccess('Login Berhasil! Selamat datang di AutoTrack dengan akun Google Anda.');
+      CustomToast.notifyLoginSuccess('Login Berhasil!');
       
       // Ensure user document exists in Firestore
       if (result.user != null) {
